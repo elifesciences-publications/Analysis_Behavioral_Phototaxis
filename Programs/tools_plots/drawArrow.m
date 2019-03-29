@@ -1,0 +1,9 @@
+function [ h ] = drawArrow(x, y)
+
+h = annotation('arrow');
+set(h,'parent', gca, ... 
+    'position', [x(1),y(1),x(2)-x(1),y(2)-y(1)], ...
+    'HeadLength', 12, 'HeadWidth', 7, 'HeadStyle', 'cback1',...
+    'Color', [0 0.2 0.2]);
+
+end
