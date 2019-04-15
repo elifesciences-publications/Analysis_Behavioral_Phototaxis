@@ -9,8 +9,8 @@ for dt = 1:dT
     Vart1 = (dXissbiais(:, 1:end-dt));
     Vart2 = (dXissbiais(:, dt+1:end)); 
     
-    minbin = 20;
-    maxbin = 25;
+    minbin = 18;
+    maxbin = 30;
     [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, minbin, maxbin);
     
     mV1 = nanmean(v2bin,2);
@@ -24,7 +24,6 @@ end
 xticks([ -pi/3, 0, pi/3])
 xticklabels({'-\pi/3', '0', '\pi/3'})
 yticks([-0.2:0.1:0.2])
-%ylim([-0.2 0.2])
 xlim([-pi/2 pi/2])
 xlabel('<\delta\theta_n_-_1>_{bias corrected}')
 ylabel('<\delta\theta_n>_{bias corrected}')

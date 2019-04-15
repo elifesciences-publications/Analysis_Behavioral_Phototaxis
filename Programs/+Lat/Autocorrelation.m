@@ -3,14 +3,12 @@
 % and ACF (lag = 0 : inf)
 
 %% ::: Autocorrelation in reinforcement/inhibition conditions :::
-dX = dXl;
+dX = dXLssbiais;
 C = DIlr;
 
 binsdXdX = 9;
 binspflip = 7;
-Lat.a.auto_co_reinforcement(dX, dXissbiais, C, binsdXdX, binspflip, 1)
-
-Lat.a.auto_co_reinforcement_abscontrast(dXl, dXi, C, binspflip+3, 1)
+Lat.auto_co_reinforcement(dX, dXissbiais, C, binsdXdX, binspflip, 1, 'absolute')
 
 %% Autocorrelation in coherence/conflict situations : NOT INTERESTING
 dC = diff(DIlr,1,2);

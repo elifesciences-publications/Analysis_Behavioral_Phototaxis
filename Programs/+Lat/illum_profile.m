@@ -8,9 +8,9 @@ function[] = illum_profile(Xfilt, L, R)
 %--- on data ---
 %***
 figure
-polarplot(Xfilt(:), R(:), 'r.', 'DisplayName', 'right', 'Color', rcolour(2,:))
+polarplot(XLat(:), R(:), 'r.', 'DisplayName', 'right', 'Color', rcolour(2,:))
 hold on
-polarplot(Xfilt(:), L(:), 'b.', 'DisplayName', 'left', 'Color', lcolour(2,:))
+polarplot(XLat(:), L(:), 'b.', 'DisplayName', 'left', 'Color', lcolour(2,:))
 %polarplot(Xfilt(:), -(L(:)-R(:)), 'k.', 'DisplayName', 'C')
 title('on data')
 legend
@@ -30,28 +30,54 @@ fake = polar(theta, max(illumL)*ones(1,length(illumL)));
 set(fake,'Visible','off', 'HandleVisibility', 'off'); 
 hold on
 
-p = polar(theta-pi/2, illumR);
-p.DisplayName= 'right';
-p.LineWidth= 1.5; 
-p.Color = rcolour(3,:);
+pr = polar(theta-pi/2, illumR);
+pr.DisplayName= 'right';
+pr.LineWidth= 1.5; 
+pr.Color = rcolour(3,:);
 hold on
-a = fill(get(p,'XData'), get(p,'YData'), rcolour(3,:));
+xfill = get(pr,'XData');
+yfill = get(pr,'YData');
+yfillc = yfill;
+xfillc = xfill;
+yfillc(xfill>0) = [];
+xfillc(xfill>0) = [];
+yfill(xfill<0) = [];
+xfill(xfill<0) = [];
+ac = fill(xfillc, yfillc, rcolour(3,:), 'DisplayName', 'conflictual situation (right)');
+a = fill(xfill, yfill, rcolour(3,:), 'DisplayName', 'non-conflictual situation (right)');
+
+ac.EdgeColor = rcolour(2,:);
+ac.EdgeAlpha = 1;
+ac.FaceAlpha =  0.5;
+
 a.EdgeColor = rcolour(2,:);
 a.EdgeAlpha = 1;
-a.FaceAlpha =  0.5;
-a.HandleVisibility = 'off';
+a.FaceAlpha =  0.2;
 
 hold on
-p=polar(theta-pi/2, illumL);
-p.DisplayName =  'left';
-p.LineWidth = 1.5;
-p.Color =  lcolour(3,:);
+pl = polar(theta-pi/2, illumL);
+pl.DisplayName =  'left';
+pl.LineWidth = 1.5;
+pl.Color =  lcolour(3,:);
 hold on
-a = fill(get(p,'XData'), get(p,'YData'), lcolour(3,:));
+xfill = get(pl,'XData');
+yfill = get(pl,'YData');
+yfillc = yfill;
+xfillc = xfill;
+yfillc(xfill>0) = [];
+xfillc(xfill>0) = [];
+yfill(xfill<0) = [];
+xfill(xfill<0) = [];
+ac = fill(xfillc, yfillc, lcolour(3,:), 'DisplayName', 'conflictual situation (left)');
+a = fill(xfill, yfill, lcolour(3,:), 'DisplayName', 'non-conflictual situation (left)');
+
+ac.EdgeColor = lcolour(2,:);
+ac.EdgeAlpha = 1;
+ac.FaceAlpha =  0.5;
+
 a.EdgeColor = lcolour(2,:);
 a.EdgeAlpha = 1;
-a.FaceAlpha =  0.5;
-a.HandleVisibility = 'off';
+a.FaceAlpha =  0.2;
 
 theta_ticks_to_remove = {'30','60','120','150','210','240','300','330'};
 for th = 1:length(theta_ticks_to_remove)
@@ -64,6 +90,9 @@ for th = 1:length(theta_ticks)
         'String', theta_labels{th}, 'FontSize', 14, 'FontName', 'Times New Roman');
 end
 
+ax = gcf;
+ax.FontName = 'Times New Roman';
+ax.FontSize = 18;
 
 view([-90 -90])
 

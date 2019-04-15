@@ -7,7 +7,9 @@ Spont.Load
 
 %% Individual fish raw visualization
 visu = 1;
+
 Spont.IndividualFishVisu
+
 %% General stats
 
 % --- number of sequences VS number of bouts
@@ -45,7 +47,7 @@ fig.Name = 'Spontaneous';
 edit Spont.dXvsX
 
 %% %% dX distribution
-[Wturn, Wfor, Pturn] = Spont.dXdistribution(dXi, FishID, different_fish)
+[Wturn, Wfor, Pturn] = Spont.dXdistribution(dXi, different_fish)
 wturn = Wturn(1);
 wfor = Wfor(1);
 pturn = Pturn(1);
@@ -54,6 +56,10 @@ pturn = Pturn(1);
 save_fig = 0;
 Spont.bias_distribution_individuals...
     (different_fish, dXi, FishID, sequencesperfish, fishdXmean, fishdXstd, save_fig)
+
+%% Amplitude decorrelation
+
+fig = Spont.Amplitude(dXi);
 
 %% Autocorrelation analysis
 edit Spont.Autocorrelation

@@ -20,7 +20,7 @@ if logical(visu)
         
         
         % --- look at individual trajectories ---
-        visualizeTrajectoryAndAdv(fish, Xi, xCoordi, yCoordi, Disti, Ri, dXi, trajOrientationi, 1)
+        visualizeTrajectoryAndAdv(fish, Xi, xCoordi, yCoordi, Disti, Ri, dXi, trajOrientationi)
         hold off
         %         Vart1 = DIlr(fish, 1:end-1);
         %         Vart2 = dX(fish, 1:end);

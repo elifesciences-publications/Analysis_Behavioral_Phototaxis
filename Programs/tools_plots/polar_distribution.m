@@ -4,7 +4,7 @@ function[fig] = polar_distribution(x, Nbins, FishID, colourID)
 %% appearance
 [colour] = colour_palette(0, colourID);
 txtAngle = [0,0];
-txtRng = [0.035, 0.045];
+txtRng = [-0.08, -0.06];
 
 %%
 % --- global distribution ---
@@ -72,7 +72,7 @@ for th = 1:length(theta_ticks)
 end
 
 % Altering the radial label
-%set(findall(gcf, 'String', '  4'),'String', ' Four'); 
+set(findall(gcf, 'String', '  4'),'String', ' Four'); 
 
 ax = gca;
 ax.FontSize = 14;

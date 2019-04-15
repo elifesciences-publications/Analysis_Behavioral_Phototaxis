@@ -58,11 +58,12 @@ errorbar(binvals/max(abs(binvals)), f2(:,3), f2(:,3)-ci2low(:,3), -f2(:,3)+ci2hi
 hold on
 plot([binvals(1)*1.05 binvals(end)*1.05], [0.69 0.69],...
     'k--', 'DisplayName', '\sigma_{turn} neutral')
-errorbar(binvals/max(abs(binvals)), f1(:,3), f1(:,3)-ci1low(:,3), -f1(:,3)+ci1high(:,3),...
-    'Color', [0.3 0.6 0.7], 'Linewidth', 1.5, 'DisplayName', '\sigma_{scoot} \pm ci99%')
-plot([binvals(1)*1.1 binvals(end)*1.1], [0.12 0.12],...
-    '--', 'Color', [0.3 0.6 0.7], 'DisplayName', '\sigma_{scoot} neutral')
+ylabel('\sigma_t_u_r_n')
 
+errorbar(binvals/max(abs(binvals)), f1(:,3), f1(:,3)-ci1low(:,3), -f1(:,3)+ci1high(:,3),...
+    'Color', [0.3 0.6 0.7], 'Linewidth', 1.5)
+hold on
+plot([binvals(1)*1.1 binvals(end)*1.1], [0.12 0.12], '--', 'Color', [0.3 0.6 0.7])
 ylabel('<\sigma>')
 ax=gca;
 ax.FontSize = 14;
@@ -72,8 +73,6 @@ xlim([binvals(1)*1.1 binvals(end)*1.1])
 xlabel('relative contrast (I_L-I_R)/I_m_a_x')
 title({'Mean bout variance',...
     'from double gaussian fit'}')
-
-legend
 
 %%  (3) P(turn)
 %***
@@ -96,23 +95,18 @@ title('')
 Var1 = dLum(:, 1:mednbouts)./( (Lum(:, 1:mednbouts)+ Lum(:, 2:mednbouts+1))./2 ) ;
 Var2 = dX(:, 2:mednbouts+1);
 dX(dX==0)=NaN;
-[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Var1, Var2, 24, 27);
+[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Var1, Var2, 15, 17);
 
 wturn = nan(1, size(v2bin_pos,1));
 wfor = nan(1, size(v2bin_pos,1));
 pturn = nan(1, size(v2bin_pos,1));
 pfor = nan(1, size(v2bin_pos,1));
-ci = nan(size(v2bin_pos,1), 2);
 
 for i = 1 : size(v2bin_pos,1)
     selection = v2bin_pos(i,:);
     selection(abs(selection)>pi) = NaN;
-    [wturn(i), wfor(i), pturn(i), pfor(i), ci(i,:)] = Gauss2custom(selection ); % /!\ !!!!!
+    [wturn(i), wfor(i), pturn(i), pfor(i)] = Gauss2custom(selection ); % /!\ !!!!!
 end
-
-%proba min and max
-ci(ci>1)=1;
-ci(ci<0)=0;
     
 %  (2) <dX2>
 %***
@@ -139,7 +133,7 @@ ax.FontWeight = 'bold';
 %  (3) P(turn)
 %***
 figure
-errorbar(binvals/max(abs(binvals)), pturn, pturn'-ci(:,1), ci(:,2)-pturn',...
+plot(binvals/max(abs(binvals)), pturn,...
     'k-sq', 'Markersize', 6, 'MarkerFaceColor', 'k')
 ylim([0 1])
 ylabel('P(turn)')
@@ -190,7 +184,7 @@ for i = 1 : size(v2bin, 1)
     a(i) = myfit.a;
     mut(i) = myfit.mut;
     sigmat(i) = myfit.sigmat;
-    ci = confint(myfit,0.99);
+    ci = confint(myfit,0.95);
     aconfint(i,:) = ci(:,1)';
     muconfint(i,:) = ci(:,2)';
     sigmaconfint(i,:) = ci(:,3)';
