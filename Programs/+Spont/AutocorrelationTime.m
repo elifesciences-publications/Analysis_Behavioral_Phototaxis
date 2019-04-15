@@ -1,7 +1,10 @@
 
 % convert sequences of angles per bouts
 % to angles per frames
+<<<<<<< HEAD
 colour = colour_palette(0, 1);
+=======
+>>>>>>> master
 
 dangles_per_bouts = dXissbiais;
 corresponding_times = TimeBouti(:,1:end-1);
@@ -40,6 +43,7 @@ plot(TT',dAA')
 %%
 [ACinorm, sem] = xcorrMatrixRows (dAA);
 
+<<<<<<< HEAD
 lags_i = [1:200];
 %***
 figure
@@ -56,10 +60,19 @@ ax.Children(2).LineWidth = 2;
 ax.LineWidth = 1.5;
 ax.FontName = 'Times New Roman';
 ax.FontSize = 16;
+=======
+lags = [1:200];
+plot(lags*minimal_sampling_rate, ACinorm(lags))
+>>>>>>> master
 
 %% with inter-bout interval
 dAA = fillmissing(dAA, 'previous', 2);
 TT = fillmissing(TT, 'previous', 2);
+<<<<<<< HEAD
+=======
+dAA(badseq,:) = [];
+TT(badseq,:) = [];
+>>>>>>> master
 
 dTT = diff(TT, 1, 2);
 
@@ -82,8 +95,13 @@ errorbar(binvals, mv2, stdv2/sqrt(elts_per_bin),...
 % --- only turns ---
 dXt = dXissbiais(:,1:end-1);
 dXtp1 = dXissbiais(:,2:end);
+<<<<<<< HEAD
 dXt(abs(dXt)<0.2) = NaN;
 dXtp1(abs(dXtp1)<0.2) = NaN;
+=======
+dXt(abs(dXt)<0.2)=NaN;
+dXtp1(abs(dXtp1)<0.2)=NaN;
+>>>>>>> master
 
 pdXndXnp1 = dXt.*dXtp1;
 pabsdXndXnp1 = abs(dXt).*abs(dXtp1);

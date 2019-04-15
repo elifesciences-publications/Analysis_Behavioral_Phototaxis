@@ -102,7 +102,11 @@ plot(ACinorm)
 var1 = dXi;
 var2 = Disti/11.5;
 
+<<<<<<< HEAD
 [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 12, 18);
+=======
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 20, 24);
+>>>>>>> master
 mv2 = median(v2bin,2);
 stdv2 = std(v2bin,1,2);
 

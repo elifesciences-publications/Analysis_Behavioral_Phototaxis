@@ -9,7 +9,11 @@
 
 %% autocorrelation (2/2) : lag1
 dT = 1; % lag
+<<<<<<< HEAD
 Spont.autocorr_lag_dt(dXissbiais,dT);
+=======
+Spont.a.autocorr_lag_dt(dXissbiais,dT);
+>>>>>>> master
 
 %% Fit autocorrelation function to get p_flip
 
@@ -26,16 +30,32 @@ autocorr_fit
 
 % inputs 4 & 5 : analytical solution (optional)
 %        6 & 7 : simulation (optional)
+<<<<<<< HEAD
 fig = Spont.autocorr_function_plots(dXissbiais, FishID, 'np', t_a, Cor); %, t_sim, ac
+=======
+fig = Spont.a.autocorr_function_plots(dXissbiais, FishID, t_a, Cor); %, t_sim, ac
+>>>>>>> master
 
 txt = text(5, p_flip, {['p_f_l_i_p = ' num2str(p_flip, 3)]}) ;
 txt.FontSize = 14;
 txt.FontName = 'Times New Roman';
 
+<<<<<<< HEAD
 %% autocorrelation with simu (2/2) : lag1
 [colour] = colour_palette(0,1);
 dT = 1; % lag
 fig = Spont.autocorr_lag_dt(dXissbiais,dT);
+=======
+save_fig=0;
+if save_fig
+    save_fig_and_svg(fig, 'final/spont', 'ACF');
+    save_fig_png(fig, 'final/spont', 'ACF');
+end
+%% autocorrelation with simu (2/2) : lag1
+[colour] = colour_palette(0,1);
+dT = 1; % lag
+fig = Spont.a.autocorr_lag_dt(dXissbiais,dT);
+>>>>>>> master
 
 [errfit] = theta_measure_error_estimation(x);
 %convDY1err = conv(DY1,errfit, 'same')/sum(errfit);
@@ -87,7 +107,11 @@ pabsdXndXnp1 = abs(dXn).*abs(dXnp1);
 
 var1 = IBIi(:,1:end-1);
 var2 = pdXndXnp1./pabsdXndXnp1;
+<<<<<<< HEAD
 [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 9, 12);
+=======
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 12, 20);
+>>>>>>> master
 mv2 = mean(v2bin,2);
 stdv2 = std(v2bin,1,2);
 
@@ -107,7 +131,11 @@ pabsdXndXnp1 = abs(dXn).*abs(dXnp1);
 
 var1 = IBIi(:,1:end-1);
 var2 = pdXndXnp1./pabsdXndXnp1;
+<<<<<<< HEAD
 [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 12, 18);
+=======
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 20, 30);
+>>>>>>> master
 mv2 = mean(v2bin,2);
 stdv2 = std(v2bin,1,2);
 

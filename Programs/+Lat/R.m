@@ -9,11 +9,19 @@ Rproj = Rcirc.*cos(meanXovertime+pi/2);
 
 %***
 fig = figure;
+<<<<<<< HEAD
 plot(Rcirc(1:40),...
     'DisplayName','R : mean resultant vector length', 'Linewidth', 2, 'Color', colour(2,:))
 hold on
 plot(Rproj(1:40),...
     'DisplayName', 'R.cos(<\theta>_{bout})', 'Linewidth', 2, 'Color', colour(1,:))
+=======
+plot(Rcirc(1:50),...
+    'DisplayName','R : mean resultant vector length', 'Linewidth', 2, 'Color', colour(2,:))
+hold on
+plot(Rproj(1:50),...
+    'DisplayName', 'R.cos(<\theta>)', 'Linewidth', 2, 'Color', colour(1,:))
+>>>>>>> master
 xlabel('bout #')
 yticks([-0.1:0.1:0.3])
 legend
@@ -39,7 +47,11 @@ for i = unique(FishID)'
 end
 Rproj_perfish = Rperfish.*cos(meanX_perfish+pi/2);
 
+<<<<<<< HEAD
 Nbins = 20;
+=======
+Nbins = 18;
+>>>>>>> master
 rbins_perfish = ((-Nbins/2:Nbins/2-1) + 0.5) * range(Rproj_perfish(:))/Nbins;
 Rpdf_perfish = hist(Rproj_perfish,Nbins)./sum(hist(Rproj_perfish,Nbins));
 
@@ -53,8 +65,15 @@ xlabel('sequence #')
 ylabel('R per sequence')
 
 %***
+<<<<<<< HEAD
 fig1 = figure;
 
+=======
+fig = figure;
+
+%*
+subplot(2,1,1)
+>>>>>>> master
 barh(sort(Rproj_perfish), 'FaceColor', colour(1,:))
 sum(Rproj_perfish>0)/length(Rproj_perfish)
 text(5, 0.6, ['Rsource>0 ' num2str(sum(Rproj_perfish>0)/length(Rproj_perfish)*100) '% of the fish'])
@@ -66,8 +85,13 @@ ax = gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
 
+<<<<<<< HEAD
 %***
 fig2 = figure;
+=======
+%*
+subplot(2,1,2)
+>>>>>>> master
 plot(rbins_perfish, smooth(Rpdf_perfish),'k', 'Linewidth', 1.5)
 hold on
 plot([0 0], [0 0.15], 'k')
@@ -113,6 +137,7 @@ meanRprojonseqperfish = meanRonseqperfish.*cos(meanXperfish+pi/2);
 
 %***
 figure
+<<<<<<< HEAD
 polarplot(meanXperfish+pi/2, Rcircperfish, 'ko', 'MarkerFaceColor', colour(1,:), 'MarkerSize', 10)
 hold on
 set(gca,'ThetaZeroLocation','bottom',...
@@ -120,11 +145,24 @@ set(gca,'ThetaZeroLocation','bottom',...
 ax=gca;
 ax.ThetaAxisUnits = 'radians';
 ax.RAxisLocation = pi;
+=======
+subplot(2,1,1)
+polarplot(meanXperfish+pi/2, Rcircperfish, 'ko', 'MarkerFaceColor', colour(1,:))
+hold on
+set(gca,'ThetaZeroLocation','bottom',...
+        'ThetaDir','clockwise')
+ax = gca;
+ax.FontSize = 14;
+ax.FontName = 'Times New Roman';
+ax.ThetaAxisUnits = 'radians';
+ax.RAxisLocation = pi;    
+>>>>>>> master
 ax.RMinorGrid = 'on';
 rticks(0:0.5:1)
 thetaticks((0 : pi/4 : 2*pi))
 thetaticklabels({'0', '', '\pi/2', '', '\pi', '', '-\pi/2'})
 
+<<<<<<< HEAD
 ax.FontName = 'Times New Roman';
 ax.FontSize = 16;
 
@@ -138,6 +176,17 @@ errorbar(wrapToPi(meanXperfish+pi/2),meanRprojonseqperfish, stdRonseqperfish./sq
     'DisplayName', 'Mean & SEM on different sequences of individuals')
 plot([-pi pi], [0 0], '--k', 'HandleVisibility', 'off');
 plot([0 0], [-1 1], '--k', 'HandleVisibility', 'off');
+=======
+subplot(2,1,2)
+plot(wrapToPi(meanXperfish+pi/2), Rprojperfish,...
+    'ko', 'MarkerFaceColor', colour(1,:), 'DisplayName', 'Mean on all bouts/individual')
+hold on
+errorbar(wrapToPi(meanXperfish+pi/2),meanRprojonseqperfish, stdRonseqperfish./sqrt(seqperfish),...
+    'Color', colour(2,:), 'Marker', '.', 'MarkerEdgeColor', colour(2,:), 'LineStyle', 'none',...
+    'DisplayName', 'Mean & SEM on different sequences of individuals')
+plot([-pi pi], [0 0], '--k');
+plot([0 0], [-1 1], '--k');
+>>>>>>> master
 xlim([-pi pi])
 xticks([-pi,-pi/2, 0,pi/2, pi])
 xticklabels({'-\pi','-\pi/2', '0','\pi/2', '\pi'})
@@ -145,5 +194,9 @@ xlabel('<\theta>_f_i_s_h')
 ylabel('R_f_i_s_h')
 ax=gca;
 ax.FontName = 'Times New Roman';
+<<<<<<< HEAD
 ax.FontSize = 16;
+=======
+ax.FontSize = 14;
+>>>>>>> master
 

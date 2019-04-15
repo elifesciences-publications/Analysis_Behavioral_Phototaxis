@@ -26,13 +26,22 @@ errorbar(binvals, mV2, std(v2bin,1,2)/sqrt(elts_per_bin),...
 hold on
 plot(binvals(interval), Acoeff*binvals(interval),...
     'DisplayName', ['Linear fit : a = ' num2str(Acoeff)], 'Color', colour(1,:), 'Linewidth', 1.5);
+<<<<<<< HEAD
 ylim([-0.25 0.25])
 title(['bias until bout ' num2str(medboutsperseq)])
+=======
+ylim([-0.2 0.2])
+title('bias')
+>>>>>>> master
 ylabel('<\delta\theta>')
 xlabel('relative contrast')
 legend
 ax = gca;
+<<<<<<< HEAD
 ax.FontSize = 20;
+=======
+ax.FontSize = 14;
+>>>>>>> master
 ax.FontName = 'Times New Roman';
 
 %***
@@ -210,7 +219,11 @@ title(['bias coefficient on ' num2str(win) ' bouts window'])
 Vart1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
 Vart2 = dXLssbiais(:,1:17);
 
+<<<<<<< HEAD
 [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 7, 9);
+=======
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 5, 7);
+>>>>>>> master
 mV2 = nanmean(v2bin,2);
 mV2sq = nanvar(v2bin,1,2);
 
@@ -218,21 +231,32 @@ f1 = NaN(size(v2bin,1), 3);
 f2  = NaN(size(v2bin,1), 3);
 ci1 = NaN(size(v2bin,1), 3, 2);
 ci2 = NaN(size(v2bin,1), 3, 2);
+<<<<<<< HEAD
 std1 = NaN(size(v2bin,1), 3);
 std2 = NaN(size(v2bin,1), 3);
+=======
+>>>>>>> master
 %***
 figure
 for i = 1 : size(v2bin, 1)
     [dx_histogram, x_histogram] = hist(v2bin(i,:), 2*round(sqrt(elts_per_bin)),...
         'Normalization', 'probability');
+<<<<<<< HEAD
     [f, lol, lil] = fit(x_histogram.',dx_histogram.','gauss2');
+=======
+    f = fit(x_histogram.',dx_histogram.','gauss2');
+>>>>>>> master
     forward = @(x) f.a1*exp(-((x-f.b1)/f.c1).^2);
     side = @(x) f.a2*exp(-((x-f.b2)/f.c2).^2);
     
     plot(x_histogram, dx_histogram)
     hold on
     plot(x_histogram, f.a1*exp(-((x_histogram-f.b1)/f.c1).^2) + f.a2*exp(-((x_histogram-f.b2)/f.c2).^2))
+<<<<<<< HEAD
     %waitforbuttonpress
+=======
+    waitforbuttonpress
+>>>>>>> master
     
     CI = confint(f, 0.99);
     % forward
@@ -246,10 +270,13 @@ for i = 1 : size(v2bin, 1)
     f2(i, 2) = f.b2;
     f2(i, 3) = f.c2;
     ci2(i,1:3,:) = CI(:,4:6)';
+<<<<<<< HEAD
     
     CI = confint(f, 0.68);
     std1(i,:) = (CI(2,1:3)-CI(1,1:3))/2;
     std2(i,:) = (CI(2,4:6)-CI(1,4:6))/2;
+=======
+>>>>>>> master
 end
 
 %***
@@ -294,12 +321,21 @@ ax = gca;
 ax.FontName = 'Times New Roman';
 ax.FontSize = 14;
 
+<<<<<<< HEAD
 pturn = f2(:,1).*f2(:,3) ./ ( f1(:,1).*f1(:,3)+f2(:,1).*f2(:,3));
 stdpturn = pturn.*sqrt( (std2(:,1)./f2(:,1)).^2 + (std2(:,3)./f2(:,3)).^2 + (std1(:,1)./f1(:,1)).^2 + (std2(:,3)./f2(:,3)).^2 );
 
 %***
 fig2 = figure;
 errorbar(binvals,  pturn, stdpturn,...
+=======
+%***
+fig2 = figure;
+%subplot(2,3,[3 6])
+errorbar(binvals, f2(:,1).*f2(:,3) ./ ( f1(:,1).*f1(:,3)+f2(:,1).*f2(:,3) ),...
+    1./( ci1(:,2,2) + ci2(:,3,2) + 1./ci2(:,2,2) + 1./ci2(:,3,2) ),...
+    1./( ci1(:,2,1) + ci2(:,3,1) + 1./ci2(:,2,1) + 1./ci2(:,3,1) ),...
+>>>>>>> master
     'k-sq', 'Markersize', 6, 'MarkerFaceColor', 'k')
 ylim([0 1])
 xlabel('IL-IR')
@@ -311,7 +347,11 @@ title('turns/forward')
 Vart1 = DIlr(:,1:17)/(max(abs(DIlr(:))));
 Vart2 = dXLssbiais(:,1:17);
 
+<<<<<<< HEAD
 [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 7, 9);
+=======
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 5, 7);
+>>>>>>> master
 mV2 = nanmean(v2bin,2);
 a = nan(size(v2bin,1),1);
 mut = nan(size(v2bin,1),1);
@@ -359,7 +399,11 @@ hold on
 plot(binvals, muf*ones(length(binvals),1),...
     '--', 'Linewidth', 1.5, 'Color', colour(4,:), 'DisplayName', '\mu_{forward} fixed')
 xlabel('C_{rel}')
+<<<<<<< HEAD
 title('\mu from custom fit')
+=======
+title('\mu')
+>>>>>>> master
 ylim auto
 legend
 
@@ -370,13 +414,18 @@ hold on
 plot(binvals, sigmaf*ones(length(binvals),1),...
     '--', 'Linewidth', 1.5, 'Color', colour(4,:), 'DisplayName', '\sigma_{forward} fixed')
 xlabel('C_{rel}')
+<<<<<<< HEAD
 title('\sigma from custom fit')
+=======
+title('\sigma')
+>>>>>>> master
 legend
 
 subplot(3,1,3)
 errorbar(binvals, a, a-aconfint(:,1),aconfint(:,2)-a,...
     'LineWidth', 1.5, 'Color', colour(4,:))
 xlabel('C_{rel}')
+<<<<<<< HEAD
 title('p_{turn} estimate from custom fit')
 ylim([0 1])
 
@@ -384,6 +433,11 @@ ax = gca;
 ax.FontName = 'Times New Roman';
 ax.FontSize = 20;
 
+=======
+title('p_{turn} estimate')
+ylim([0 1])
+
+>>>>>>> master
 %% --- fit the distribution of dX with a CUSTOM double-gaussian (2) : ABSOLUTE CONTRAST---
 Vart1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
 Vart2 = dXLssbiais(:,1:17);

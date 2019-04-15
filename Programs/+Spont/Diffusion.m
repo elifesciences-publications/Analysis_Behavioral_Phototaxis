@@ -25,6 +25,10 @@ correspondingcoeff = psfit(p_flip_perfish);
 % to D = var*int(AC)
 
 di = NaN(length(different_fish),1);
+<<<<<<< HEAD
+=======
+max = 1;
+>>>>>>> master
 MSDperfishi = NaN(length(different_fish), size(Xi,2));
 for fish = 1 : length(different_fish)
     rowsOfsequencesOneFish = find(FishID == fish);
@@ -96,7 +100,11 @@ plot(bforplot,MSD(bforplot+1),...
 %  '--', 'Linewidth', 1.5, 'DisplayName', 'Simulation');
 
 xlim([0 20])
+<<<<<<< HEAD
 ylabel('< (\theta_n-\theta_{n_0}) ^2>')
+=======
+ylabel('< (\delta\theta_n-\delta\theta_{n_0}) ^2>')
+>>>>>>> master
 xlabel('bout #')
 ax =gca;
 ax.FontSize= 14;

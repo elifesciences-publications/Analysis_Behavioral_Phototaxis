@@ -18,7 +18,11 @@ cipturn = NaN(Nbins, 2);
 for i = 1 : Nbins
     disp(i)
     
+<<<<<<< HEAD
     binwidth = 3*iqr(v2binMatrix(i,:))/((elts_per_bin)^(1/3));
+=======
+    binwidth = 4*iqr(v2binMatrix(i,:))/((elts_per_bin)^(1/3));
+>>>>>>> master
     bins = minv2 : binwidth : maxv2;
     [~, devfromzeroidx] = min(abs(bins));
     bins = bins -  bins(devfromzeroidx);
@@ -37,9 +41,18 @@ for i = 1 : Nbins
     wfor(i) = (alpha*sqrt(pi/2) - a*wturn(i))/(1-a);
     pfor(i) = 1-a;
     pturn(i) = a;
+<<<<<<< HEAD
     cipturn(i,:) = confint(f, 0.99)';
      
     hold on;  plot(f, x_hist',d_hist')
     
+=======
+    cipturn(i,:) = confint(f)';
+     
+    h=figure;
+    hold off; plot(x_hist, d_hist);
+    hold on;  plot(f, x_hist',d_hist')
+    waitfor(h)  
+>>>>>>> master
 end
 

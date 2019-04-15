@@ -58,32 +58,15 @@ xlabel('XLat')
 ylabel('Xfilt')
 
 subplot(3,1,2)
-err = XLat-Xfilt;
-err(err==0)=[];
-histogram(rad2deg(err))
+histogram(rad2deg(XLat-Xfilt))
 title('error on angle detection in the experiment')
 
 L2 = interp1(deg2rad(lum_lin(:,1)),lum_lin(:,2),pi-abs(pi-mod(Xfilt,2*pi))); 
 R2 = interp1(deg2rad(lum_lin(:,1)),lum_lin(:,2),abs(pi-mod(Xfilt,2*pi)));
 DIlr2 = L2-R2;
-err_i = DIlr-DIlr2;
+err = DIlr-DIlr2;
 subplot(3,1,3)
-histogram(err_i(err_i~=0))
-
-% --- gaussian fit of angular error---
-err(isnan(err))=[];
-N = length(err);
-binwidth = 3*iqr(err(:))/(N^(1/3));
-bins = min(err(:)) : binwidth : max(err(:));
-[yhist, edges]  = histcounts(err, bins);
-xhist = edges(1:end-1) + binwidth/2;
-yhist = yhist/(sum(yhist)*binwidth);
-f = fit(xhist.',yhist.','gauss1');
-sigma_error = f.c1;
-
-%***
-figure
-plot(f, xhist, yhist)
+histogram(err(err~=0))
 
 %% ::: Basic visualization :::
 
@@ -112,7 +95,7 @@ Nbins=18;
 colourID = 3;
 [fig] = polar_distribution(XLat+pi/2, Nbins, FishID, colourID);
 
-[figsub] = polar_distribution(XLat(:,2:17)+pi/2, Nbins, FishID, colourID);
+[figsub] = polar_distribution(XLat(:,2:21)+pi/2, Nbins, FishID, colourID);
 
 [figsub2] = polar_distribution(XLat(:,2:boutsPerSeq)+pi/2, Nbins, FishID, colourID);
 
@@ -204,7 +187,7 @@ ax.FontSize = 14;
 
 %% --
 % --- regular bins ---
-Nbins = 10;
+Nbins = 20;
 Vart1 = IBI(:, 1:end-1);
 Vart2 = (dXl(:, 1:end-1).*dXl(:, 2:end))./(abs(dXl(:, 1:end-1)).*abs(dXl(:, 2:end)));
 [binvals, v2mean, v2std, v2eltspb] = regular_bins(Vart1, Vart2, Nbins);

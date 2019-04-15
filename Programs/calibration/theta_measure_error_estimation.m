@@ -3,7 +3,11 @@ function[errfit, mu, sigma] = theta_measure_error_estimation(varargin)
 % Estimation of Theta (X) measure error
 % => gaussian fit on baseline (noise)
 
+<<<<<<< HEAD
 pathdirectory = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/Uncertainty';
+=======
+pathdirectory = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/Error_estimation_theta';
+>>>>>>> master
 filename = 'X_error_estimation';
 
 load([pathdirectory filesep filename '.mat'], 'Err')
