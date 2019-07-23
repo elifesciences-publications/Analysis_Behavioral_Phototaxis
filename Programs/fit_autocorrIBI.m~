@@ -1,0 +1,4 @@
+function[] = fit_autocorrIBI(x, rflip)
+
+x = x*binsize;
+f = exp(-x*2*rflip);

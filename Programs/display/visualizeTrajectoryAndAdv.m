@@ -50,6 +50,9 @@ for s = fish'
         uvy1 = linspace(yCoord(s,i),yCoord(s,i)+unitvecty1(i), 10);
         plot(uvx, uvy,'k', uvx1, uvy1, 'r')
         arrow_color = [norm_turn_magn(i) 0 1-norm_turn_magn(i)];
+        if isnan(arrow_color)
+            return
+        end
         drawArrow([uvx1(1) uvx1(end)], [uvy1(1) uvy1(end)], arrow_color);
     end
     

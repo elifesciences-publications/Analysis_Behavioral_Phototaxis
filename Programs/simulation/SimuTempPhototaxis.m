@@ -39,91 +39,46 @@ e6_dx =  diff( e6_x, 1, 2 );
 s6_dx =  diff( s6_x, 1, 2 );
 alldx = [e3_dx(:) ; e6_dx(:) ; s6_dx(:)];
 
+% lum
+lum_exp6 = luminosity_exponentielle(0.6);
+lum_exp3 = luminosity_exponentielle(0.3);
+lum_sin6 = luminosity_sinus(0.6);
+
 [dx_histogram, x_histogram] = hist(alldx, 100);
 f = fit(x_histogram.',dx_histogram.','gauss2'); 
 
-%***
-fig = figure;
-plot(x_histogram, dx_histogram, 'Linewidth', 2)
-hold on
-forward = @(x) f.a1*exp(-((x-f.b1)/f.c1).^2);
-side = @(x) f.a2*exp(-((x-f.b2)/f.c2).^2);
-plot(x_histogram,  forward(x_histogram)+side(x_histogram), x_histogram, side(x_histogram), 'Linewidth', 1.5)
-
 %% check proba functions
 dll = -2:0.01 : 1;
-for i = 1 : length(dll)
-    [pt(i), wt(i)] = ProbaTurnFLum(dll(i));
-end
+[pt, wt] = ProbaTurnFLum(dll);
 
 %***
 figure;
 plot(dll, pt, dll, wt);
 legend('proba turn', 'w turn')
 
-%% lum
-lum_exp6 = luminosity_exponentielle(0.6);
-lum_exp3 = luminosity_exponentielle(0.3);
-lum_sin6 = luminosity_sinus(0.6);
-lum = lum_exp6;
+%% choose experiment 
+lum = lum_exp3;
+x = e3_x;
+f = e3_f;
+boutsperseq = size(x,2)-sum(isnan(x),2);
+medboutsperseq = median(boutsperseq);
 
-% intitialization
-%--------------------------------------------------------------------------
-psw_side = 0.188; % probabibility of switching left vs right states
-p_turn = 0.4; % probability of triggering a turn swim (otherwise go straight)
-
-wturn=0.69; % 0.74
-wstraight=0.1; % 0.12
-%--------------------------------------------------------------------------
+%% parameters
 
 %rng('shuffle')
-Nexp = 10000; % number of experiments
-Ntimes = 50; % number of time steps per experiment
-theta_complete = NaN(Nexp, Ntimes); % complete dataset
-luminosity_complete = NaN(Nexp, Ntimes);
+Nexp = 10000; % number of experiments 
+Nsteps = 50; % number of time steps per experiment
 
-theta_ini = rand(1,Nexp)*2*pi; % initial angles uniformly distributed
-luminosity_ini = interp1(lum(:,1), lum(:,2), abs(wrapTo180(rad2deg(theta_ini))));
-lrst = (rand > 0.5)*2-1; % intial turn state random 50/50
+[theta_complete, luminosity_complete, lambda] = random_walk_temporal_bias(Nexp, Nsteps, lum);
 
-tic
-for N = 1:Nexp
-    theta = NaN(1,Ntimes);
-    luminosity = NaN(1,Ntimes);
-    theta(1) = theta_ini(N);
-    luminosity(1) = luminosity_ini(N);
-    for t = 1:Ntimes-1
-        th = theta(t);
-        lrst = lrst*((rand > psw_side)*2-1); % independent from whole field illum
-        if t > 2
-            dll = (luminosity(t) - luminosity(t-1))/((luminosity(t) + luminosity(t-1))/2) ; 
-            [p_turn, wturn] = ProbaTurnFLum(dll);
-        end
-        turn = rand < p_turn;
-        if turn
-            dth = lrst * abs(wturn*randn);
-        else
-            dth = (wstraight*randn);
-        end
-        
-        theta(t+1) = th + dth;
-        
-        luminosity(t+1) = interp1(lum(:,1), lum(:,2), abs(wrapTo180(rad2deg(theta(t+1)))));
-    end
-    theta_complete(N,:) = theta;
-    luminosity_complete(N,:) = luminosity;
-end
 
 alpha = theta_complete(:);
 [mp, rho_p, mu_p] = circ_moment(alpha);
 
-
 Nbins = 18;
 angle = ( (1:Nbins) -0.5) * 2*pi/Nbins;
 PDFangle = hist(mod(theta_complete(:),2*pi),Nbins)/sum(hist(mod(theta_complete(:),2*pi),Nbins));
-PDFangleExp =  hist(mod(e6_x(:),2*pi),Nbins)/sum(hist(mod(e6_x(:),2*pi),Nbins));
-%PDFangleExp =  hist(mod(e3_x(:),2*pi),Nbins)/sum(hist(mod(e3_x(:),2*pi),Nbins));
-%PDFangleExp =  hist(mod(s6_x(:),2*pi),Nbins)/sum(hist(mod(s6_x(:),2*pi),Nbins));
+PDFangleExp =  hist(mod(x(:),2*pi),Nbins)/sum(hist(mod(x(:),2*pi),Nbins));
 
 % ***
 fig = figure;
@@ -153,19 +108,118 @@ disp('R proj')
 circ_r(theta_complete(:))*cos(circ_mean(theta_complete(:)-pi)) 
 
 % ***
-med_bouts_per_seq = median(size(e6_x,2)-sum(isnan(e6_x),2))+10;
-xData = e6_x(:,1:med_bouts_per_seq);
+med_bouts_per_seq = median(size(x,2)-sum(isnan(x),2));
+xData = x(:,1:medboutsperseq);
 xSimu = theta_complete;
-f = e6_f;
 
-colourID = 2;
+colourID = 4;
 [fig] = polar_distribution_simu_exp(xData+pi, xSimu+pi, Nbins, f, colourID)
 
-
 toc
+
+% --- ROI ---
+virtual_roi_radius = 41 ;
+
+% calculate cartesian coordinates at each time point
+theta = theta_complete;
+a = NaN(Nexp, Nsteps);
+b = NaN(Nexp, Nsteps);
+%a(:,1) = 0;
+%b(:,1) = 0;
+rho_ini = 20+1.3*randn(Nexp, 1);
+theta_ini = deg2rad(randi(360, Nexp, 1));
+[a(:,1),b(:,1)]= pol2cart(theta_ini, rho_ini);
+%ind = randsample(length(a_ini), Nexp, true);
+%a(:,1) = a_ini(ind)-41;
+%b(:,1) = b_ini(ind)-41;
+
+for i = 1 : Nsteps-1
+    [da, db] = pol2cart(theta(:,i), lambda(:,i));
+    a(:,i+1) = a(:,i) + da;
+    b(:,i+1) = b(:,i) + db;
+end
+
+% finalize
+within_roi = (sqrt(a.^2 + b.^2) < virtual_roi_radius);
+theta(within_roi == 0) = NaN;
+meanThovertimeSimu = circ_mean(theta-pi);
+RcircSimu = circ_r(theta-pi);
+RprojSimu = RcircSimu.*cos(meanThovertimeSimu);
+
+boutsperseqSimu = size(theta,2)-sum(isnan(theta),2);
+mednboutsSimu = median(boutsperseqSimu);
+
+RcircData = circ_r(x-pi);
+meanThovertimeData = circ_mean(x-pi);
+RprojData = RcircData.*cos(meanThovertimeData);
+
+%***
+figure
+plot(RprojSimu, 'LineWidth', 2)
+hold on
+plot(RprojData, 'LineWidth', 2)
+xlim([0 30])
+legend('simu', 'data')
+xlabel('bout #')
+ylabel('R')
+ax=gca;
+ax.FontSize = 16;
+ax.LineWidth = 1.5;
+
+colourID = 4;
+%***
+[fig] = polar_distribution_simu_exp(xData(:,1:medboutsperseq)+pi, theta(:,1:mednboutsSimu)+pi, Nbins, f, colourID)
+
+%% trajectories
+%***
+seqmax = Nexp
+aa = a(1:seqmax,:);
+bb = b(1:seqmax,:);
+th = theta(1:seqmax,:);
+ll = lambda(1:seqmax,:);
+wr = within_roi(1:seqmax,:);
+aa(wr == 0) = NaN;
+bb(wr == 0) = NaN;
+for i = 1 : size(aa,1)
+    seqend = find(isnan(aa(i,:)),1);
+    if ~isempty(seqend)
+        aa(i, seqend:end) = nan;
+        bb(i, seqend:end) = nan;
+        th(i, seqend:end) = nan;
+    end
+end
+
+%plot(aa', bb', '.-')
+hold on
+%plot(aa(:,1)', bb(:,1)', 'sq')
+
+ll(wr == 0) = NaN;
+
+%***
+%figure
+xCoord0 = (aa-aa(:,1));
+yCoord0 = (bb-bb(:,1));
+rho = sqrt( (xCoord0).^2 + (yCoord0).^2 );
+
+arot = xCoord0.*cos(-pi/2) - yCoord0.*sin(-pi/2);
+brot = xCoord0.*sin(-pi/2) + yCoord0.*cos(-pi/2);
+%plot(arot',brot','.-')
+%title('source to the top')
+
+%% Compare R data and simu stationary
+xsub = x(:,2:medboutsperseq);
+RcircData = circ_r(xsub(:)-pi);
+meanTh = circ_mean(xsub(:)-pi);
+RprojData = RcircData.*cos(meanTh)
+
+medboutsperseqsimu = median(size(theta,2) - sum(isnan(theta),2));
+thetasub = theta(:,2:medboutsperseqsimu);
+meanThsimu = circ_mean(thetasub(:)-pi);
+RcircSimu = circ_r(thetasub(:)-pi);
+RprojSimu = RcircSimu.*cos(meanThsimu)
 %% time evolution
-b = 1 : 10 : Ntimes;
-for i = 2 : Ntimes
+b = 1 : 10 : Nsteps;
+for i = 2 : Nsteps
     polarhistogram(theta_complete(:,i), 50)
     drawnow
     text(30, 15, num2str(i))

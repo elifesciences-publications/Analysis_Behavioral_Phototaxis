@@ -14,6 +14,9 @@ for i = 1 : size(E, 2)
         e6_r = E(i).R;
         e6_t = E(i).T;
         e6_tb = E(i).TimeBout;
+        e6_a = E(i).a;
+        e6_b = E(i).b;
+        e6_alpha = E(i).alpha;
     elseif E(i).ExpType == 'exp30'        
         e3_x = E(i).AngleSource;
         e3_lum = E(i).Lum;
@@ -21,6 +24,9 @@ for i = 1 : size(E, 2)
         e3_r = E(i).R;
         e3_t = E(i).T;
         e3_tb = E(i).TimeBout;
+        e3_a = E(i).a;
+        e3_b = E(i).b;
+        e3_alpha = E(i).alpha;
     elseif E(i).ExpType == 'sin60'
         s6_x = E(i).AngleSource;
         s6_lum = E(i).Lum;
@@ -28,6 +34,9 @@ for i = 1 : size(E, 2)
         s6_r = E(i).R;
         s6_t = E(i).T;
         s6_tb = E(i).TimeBout;
+        s6_a = E(i).a;
+        s6_b = E(i).b;
+        s6_alpha = E(i).alpha;
     end
 end
 

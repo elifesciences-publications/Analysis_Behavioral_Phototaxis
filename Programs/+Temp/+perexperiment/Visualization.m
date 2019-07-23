@@ -7,8 +7,6 @@
 
 colors =  [colour(2,:); colour(3,:); colour(4,:)];
 
-
-%%
 % load variables from E
 Temp.perexperiment.loadPooledExpsCell
 et{1} = 'sin60';
@@ -34,11 +32,11 @@ end
 for type = 1 : size(et,2)
     
     %choose experiment type
-   [lum, dlum, x, dx, r, tb, ibi, t, f] = Temp.perexperiment.choose_experiment(et{type});
+   [lum, dlum, x, dx, r, tb, ibi, t, f, a, b, alpha] = Temp.perexperiment.choose_experiment(et{type});
     color = colors(type,:);
-    
+    et
     boutsperseq = size(x,2)-sum(isnan(x),2);
-    medbout = round(median(boutsperseq));
+    medbout = round(median(boutsperseq))
     
     x = x(:,2:medbout);
     x = x-pi;
@@ -84,6 +82,7 @@ for type = 1 : size(et,2)
     fig3 = polar_distribution(x, Nbins, f, 4);
 end
 
+
 %% plain distributions : ALL ON ONE FIGURE
 
 %***
@@ -105,12 +104,34 @@ for type = 1 : size(et,2)
     polar_distribution_hold_on(x, Nbins, f, colour(type,:));
 end
 
+%% plain trajectories
+
+for type = 1 : size(et,2)
+    
+    %choose experiment type
+   [lum, dlum, x, dx, r, tb, ibi, t, f, a, b, alpha] = Temp.perexperiment.choose_experiment(et{type});
+   
+   figure;
+   xCoord0 = (a-a(:,1))/11.5;
+   yCoord0 = (b-b(:,1))/11.5;
+   rho = sqrt( (xCoord0).^2 + (yCoord0).^2 );
+   
+   arot = xCoord0.*cos(-wrapToPi(x(:,1))+alpha(:,1)-pi/2) - yCoord0.*sin(-wrapToPi(x(:,1)) + alpha(:,1)-pi/2);
+   brot = xCoord0.*sin(-wrapToPi(x(:,1))+alpha(:,1)-pi/2) + yCoord0.*cos(-wrapToPi(x(:,1)) + alpha(:,1)-pi/2);
+   plot(arot',brot','.-')
+   title([et{type} 'source to the top'])
+   size(arot)
+end
 
 %% R per fish
 
 %***
-figure
+fig1 = figure;
+fig2 = figure;
 hold on
+
+h_mean = NaN(3, length(unique(FishID)));
+pval_nonunif = NaN(3, length(unique(FishID)));
 for type = 1 : size(et,2)
     
     %choose experiment type
@@ -136,12 +157,20 @@ for type = 1 : size(et,2)
         meanXperfish(i) = circ_mean(xfish);
         Rcircperfish(i) = circ_r(xfish);
         nbouts(i) = numel(xfish);
+        
+        if isempty(xfish)
+            h_mean(type, i) = NaN;
+            pval_nonunif(type, i) = NaN;
+        else
+        [h_mean(type, i), ~] = circ_mtest(xfish, 0);
+        [pval_nonunif(type, i), ~] = circ_rtest(xfish);
+        end
     end
     Rprojperfish = Rcircperfish.*cos(meanXperfish+pi/2);
     meanRprojonseqperfish = meanRonseqperfish.*cos(meanXperfish+pi/2);
     
     %***
-    subplot(2,1,1)
+    figure(fig1)
     polarplot(meanXperfish+pi/2, Rcircperfish, 'ko', 'MarkerFaceColor', colour(type,:),...
         'DisplayName', ['Mean on all bouts/individual in ' et{type}])
     hold on
@@ -158,12 +187,12 @@ for type = 1 : size(et,2)
     thetaticklabels({'0', '', '\pi/2', '', '\pi', '', '-\pi/2'})
     legend
     
-    subplot(2,1,2)
-    plot(wrapToPi(meanXperfish+pi/2), Rprojperfish,...
-        'ko', 'MarkerFaceColor', colour(type,:), 'HandleVisibility', 'off')
+    figure(fig2)
+%     plot(wrapToPi(meanXperfish+pi/2), Rprojperfish,...
+%         'ko', 'MarkerFaceColor', colour(type,:), 'HandleVisibility', 'off')
     hold on
     errorbar(wrapToPi(meanXperfish+pi/2),meanRprojonseqperfish, stdRonseqperfish./sqrt(seqperfish),...
-        'Color', colour(type,:), 'Marker', '.', 'MarkerEdgeColor', colour(type,:), 'LineStyle', 'none',...
+        'Color', colour(type,:), 'Marker', 'o','MarkerEdgeColor', 'k', 'MarkerFaceColor', colour(type,:), 'LineStyle', 'none',...
         'DisplayName', ['mean +/- sem in ' et{type}])
     plot([-pi pi], [0 0], '--k', 'HandleVisibility', 'off');
     plot([0 0], [-1 1], '--k', 'HandleVisibility', 'off');
@@ -179,11 +208,17 @@ for type = 1 : size(et,2)
     legend
 end
 
+% Combine non-uniformity with mean direction
+h_nonunif = 1-pval_nonunif;
+h_nonunif(h_nonunif>=0.99) = 1;
+h_nonunif(h_nonunif<0.99) = 0;
+signif_phototaxis = nansum(nansum(h_mean.*h_nonunif))/(numel(h_mean)-sum(isnan(h_mean(:))));
+
 %% ........................................................................
 % BINS WITH UNEVEN NUMBER OF EVENTS
 
 % choose variables to plot and dt
-v1 = 3;
+v1 = 5;
 dt = 1;
 
 %***
@@ -220,16 +255,16 @@ for type = 1 : size(et,2)
         Vart2 = dx(:, 2:end).^2;
         xl = 'dLu/Lu';
         yl = 'dX^2';
-    elseif v1 == 5       % dx^2 vs dlum
-        Vart1 = dlum(:, 1:end-1);%./((lum(:,1:end-2)+lum(:,2:end-1))/2);
-        Vart2 = t(:, dt+1:end)/pxmm;
-        xl = 'dLu/Lu';
-        yl = 'dX^2';
+    elseif v1 == 5       % dx^2 vs x
+        Vart1 = wrapToPi(x(:, 1:end-1));
+        Vart2 = dx;
+        xl = 'X';
+        yl = 'dX';
     end
     
     b1 = prctile(Vart1(:), 99.9);
     b2 = prctile(Vart1(:), 0.1);
-    bins = linspace(b2, b1, 30);
+    bins = linspace(b2, b1, 10);
     w = mean(diff(bins));
     
     meanV2 = NaN(length(bins), 1);
@@ -278,8 +313,8 @@ ax.FontSize = 14;
 [colour] = Temp.temp_colours('dark');
 
 % choose variables
-v1 = 3;
-v2 = 2;
+v1 = 5;
+v2 = 1;
 dt = 1;
 
 %***
@@ -343,12 +378,13 @@ for type = 1 : size(et,2)
         yl = 'transverse displacement';
     end
     
-    [binvals, elts_per_bin, v2binMatrix] = BinsWithEqualNbofElements(Vart1, Vart2, 12, 17);        
+    [binvals, elts_per_bin, v2binMatrix] = BinsWithEqualNbofElements(Vart1, Vart2, 18, 24);        
     
     %***
     %scat = scatter(Vart1(:), Vart2(:), 3, 'MarkerEdgeColor', color, 'DisplayName', et{type});
     %scat.MarkerEdgeAlpha = 0.1;
     hold on
+    %scatter(Vart1(:), Vart2(:))
     errorbar(binvals, mean(v2binMatrix,2), std(v2binMatrix,1,2)/sqrt(elts_per_bin),...
         'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
     
@@ -380,55 +416,151 @@ minbin = inf;
 maxbin = -inf;
 miny = inf;
 maxy = -inf;
+etdisp = {'p1','p2','p3'}
+for b = 19
+    %figure
 for type = 1 : size(et,2)
     
     %choose experiment type
     [lum, dlum, x, dx, r, tb, ibi, t, f] = Temp.perexperiment.choose_experiment(et{type});
     color = colors(type,:);
+    medboutsperseq = median(size(x,2) - sum(isnan(x),2));
+     fishdxmean=[];
+    for i = unique(f)'
+        dxf = dx(i==f,1:medboutsperseq);
+        fishdxmean = [fishdxmean ; repmat(nanmean(dxf(:)), [size(dxf,1) 1])];
+    end
     
-    xw = wrapToPi(x(:, 1:end-2));
-    Vart1_a = xw(xw>0 & xw<pi);
-    Vart1_b = xw(xw<0 & xw>-pi);
-    xl = 'X_n_-_1';
-    xticks([-pi -pi/2 0 pi/2 pi])
-    xticklabels({'-\pi' '-\pi/2' '0' '\pi/2' '\pi'})
+    xw = wrapToPi(x(:, 1:medboutsperseq)-pi);
+    Vart1_a = xw;%(xw>0 & xw<pi);
+    %Vart1_a = Vart1_a(randperm(length(Vart1_a)));
+    %Vart1_b = xw(xw<0 & xw>-pi);
+
+    Vart2_a = dx(:,1:medboutsperseq);% - fishdxmean;
+    %Vart2_a = Vart2_a(xw>0 & xw<pi);
+    %Vart2_b = dx(:, 2:end) - fishdxmean;
+    %Vart2_b = Vart2_b(xw<0 & xw>-pi);
+
     
-    Vart2_a = dx(:,2:end);% - nanmean(dx,2);
-    Vart2_a = Vart2_a(xw>0 & xw<pi);
-    Vart2_a(abs(Vart2_a)>pi) = NaN;
-    Vart2_b = dx(:, 2:end);% - nanmean(dx,2);
-    Vart2_b = Vart2_b(xw<0 & xw>-pi);
-    yl = '<dX_n> (rad)';
-    
-    [binvals_a, elts_per_bin_a, v2bin_a] = BinsWithEqualNbofElements(Vart1_a, Vart2_a, 15, 17);
-    [binvals_b, elts_per_bin_b, v2bin_b] = BinsWithEqualNbofElements(Vart1_b, Vart2_b, 15, 17);
+    [binvals_a, elts_per_bin_a, v2bin_a] = BinsWithEqualNbofElements(Vart1_a, Vart2_a, b, b);
+    %[binvals_b, elts_per_bin_b, v2bin_b] = BinsWithEqualNbofElements(Vart1_b, Vart2_b, 3, 3);
+    [h, pa] = ttest(v2bin_a');
+    %[h, pb] = ttest(v2bin_b')
     
     %***
     hold on
-    scat = scatter(Vart1_a(:), Vart2_a(:), 3, 'MarkerEdgeColor', color, 'DisplayName', et{type});
-    scat.MarkerEdgeAlpha = 0.1;
-    scat = scatter(Vart1_b(:), Vart2_b(:), 3, 'MarkerEdgeColor', color, 'DisplayName', et{type});
-    scat.MarkerEdgeAlpha = 0.1;
+%     scat = scatter(Vart1_a(:), Vart2_a(:), 3, 'MarkerEdgeColor', color, 'DisplayName', etdisp{type});
+%     scat.MarkerEdgeAlpha = 0.1;
+%     scat = scatter(Vart1_b(:), Vart2_b(:), 3, 'MarkerEdgeColor', color, 'DisplayName', et{type});
+%     scat.MarkerEdgeAlpha = 0.1;
     errorbar(binvals_a, mean(v2bin_a,2), std(v2bin_a,1,2)/sqrt(elts_per_bin_a),...
-        '-', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
-    errorbar(binvals_b, mean(v2bin_b,2), std(v2bin_b,1,2)/sqrt(elts_per_bin_b),...
-        '--', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
+        '-', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', etdisp{type})
+    h = pa<0.001;
+    signif = (h)'.*mean(v2bin_a,2);
+    signif(signif==0) = nan;
+    plot(binvals_a, signif, '*', 'MarkerSize', 12, 'DisplayName', [etdisp{type} ' significantly =/= 0'])
+    %errorbar(binvals_b, mean(v2bin_b,2), std(v2bin_b,1,2)/sqrt(elts_per_bin_b),...
+    %    '-', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
+    %h = pb<0.001;
+    %signif = (h)'.*mean(v2bin_b,2);
+    %signif(signif==0) = nan;
+    %plot(binvals_b, signif, '*', 'MarkerSize', 12)
+    
     minbin = min(minbin, binvals_b(1));
     maxbin = max(maxbin, binvals_a(end));
     miny = min(miny, prctile(Vart2_a(:), 1));
     maxy = max(maxy, prctile(Vart2_a(:), 95));
 end
+xl = '\theta_n';
+yl = '<\delta\theta_n> (rad)';
+xticks([-pi -pi/2 0 pi/2 pi])
+xticklabels({'-\pi' '-\pi/2' '0' '\pi/2' '\pi'})
 xlabel(xl)
 ylabel(yl)
-ylim([miny maxy])
-xlim([minbin*1.2 maxbin*1.2])
+ylim auto
+xlim auto
 
 grid on
-title(['dt = ' num2str(dt)])
+title(['b = ' num2str(b)])
 legend('show')
 ax = gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
+end
+
+%% dX = f(X) per fish
+
+%***
+fig = figure;
+colors = [ 145/255 171/255 60/255; 
+    229/255 98/255 38/255; 
+    89/255 10/255 49/255];
+
+for b = 5
+    figure
+for type = 1 : size(et,2)
+    
+    %choose experiment type
+    [lum, dlum, x, dx, r, tb, ibi, t, f] = Temp.perexperiment.choose_experiment(et{type});
+    color = colors(type,:);
+    medboutsperseq = median(size(x,2) - sum(isnan(x),2));
+    
+    fishdxmean=[];
+    for i = unique(f)'
+        xw = wrapToPi(x(i==f, 1:medboutsperseq)-pi);
+        dxf = dx(i==f,1:medboutsperseq);
+        if numel(dxf) - sum(isnan(dxf(:)))==0
+            continue
+        end
+        Vart1_a = xw;
+        Vart2_a = dxf - nanmean(dxf(:));
+        [binvals_a, elts_per_bin_a, v2bin_a] = BinsWithEqualNbofElements(Vart1_a, Vart2_a, b, b);
+        %[h, pa] = ttest(v2bin_a');
+        hold on
+        errorbar(binvals_a, mean(v2bin_a,2), std(v2bin_a,1,2)/sqrt(elts_per_bin_a),...
+            '-', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
+        M = [M ; mean(v2bin_a,2)];
+        B = [B ; binvals_a];
+        T = [T ; type*ones(length(binvals_a),1)];
+%         h = pa<0.001;
+%         signif = (h)'.*mean(v2bin_a,2);
+%         signif(signif==0) = nan;
+%         plot(binvals_a, signif, '*', 'MarkerSize', 12)
+    end
+    
+waitforbuttonpress
+figure
+end
+
+xl = 'X_n_-_1';
+yl = '<dX_n> (rad)';
+xticks([-pi -pi/2 0 pi/2 pi])
+xticklabels({'-\pi' '-\pi/2' '0' '\pi/2' '\pi'})
+xlabel(xl)
+ylabel(yl)
+ylim auto
+
+grid on
+title(['b = ' num2str(b)])
+legend('show')
+ax = gca;
+ax.FontSize = 14;
+ax.FontName = 'Times New Roman';
+end
+
+figure
+hold on
+for t = 1:3
+b=6
+Vart1 = B(T==t);
+Vart2 = M(T==t);
+[binvals_a, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, b, b);
+[h, pa] = ttest(v2bin');
+
+
+errorbar(binvals_a, mean(v2bin,2), std(v2bin,1,2)/sqrt(elts_per_bin),...
+    '-', 'Linewidth', 2, 'Color', color, 'CapSize', 3, 'DisplayName', et{type})
+end
 
 %% check after a certain number of bouts (shift)
 
@@ -581,3 +713,11 @@ Temp.perexperiment.loadPooledExpsCell
 % time dyn script
 Temp.perexperiment.RDynamics
 
+boutsperseq = size(s6_x,2)-sum(isnan(s6_x),2);
+s6_mednbouts = median(boutsperseq);
+
+boutsperseq = size(e6_x,2)-sum(isnan(e6_x),2);
+e6_mednbouts = median(boutsperseq);
+
+boutsperseq = size(e3_x,2)-sum(isnan(e3_x),2);
+e3_mednbouts = median(boutsperseq)

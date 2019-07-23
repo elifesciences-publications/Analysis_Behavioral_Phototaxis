@@ -6,6 +6,9 @@ v2 = v2(:);
 v1(isnan(v2)) = [];
 v2(isnan(v2)) = [];
 
+v2(isnan(v1)) = [];
+v1(isnan(v1)) = [];
+
 v2sq = v2.^2;
 
 nb_elements = numel(v2); % total number of elements

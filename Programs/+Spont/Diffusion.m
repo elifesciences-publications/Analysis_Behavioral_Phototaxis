@@ -5,6 +5,7 @@
 % .........................................................................
 
 %% Check coefficient corresponding to individual P_switch...
+aciPF = ACinormpf;
 p_flip_perfish = NaN(size(aciPF,1),1);
 data_to_fit_on = 2;
 
@@ -14,8 +15,8 @@ for i = 1 : size(aciPF,1)
     [autocorr_fit]  = AutocorrelationFit(data_to_fit_on, int, acf, pturn, wturn, wfor, 0);
     p_flip_perfish(i) = autocorr_fit.p_flip;
 end
-root_path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/';
-folder = 'SimuData';
+root_path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/';
+folder = 'DataSimulation';
 load([root_path folder filesep 'SimuPswitch.mat'], 'SimuPswitch')
 psfit = SimuPswitch.fit;
 
@@ -72,7 +73,7 @@ ul = 20;
 linfitMSD = polyfit((ll:ul), MSD_shuff(ll:ul),1);
 
 % --- add simu and analyt. ---
-[~, ~, ~, t, ~, MSD] = dx_vs_dx(wturn, wfor, pturn, p_flip);
+[~, ~, ~, t, ~, MSD] = dx_vs_dx(wturn, wfor, pturn, 0.188);
 
 % ***
 bforplot = 0:20;
@@ -83,9 +84,9 @@ hold on
 % plot(bforplot, (bforplot+1)*linfitMSD(1)+linfitMSD(2),...
 %  'g--', 'Linewidth', 1.5, 'DisplayName', ['linear fit : a = ' num2str(linfitMSD(1)) ' bouts ' num2str(ll) '-' num2str(ul)]) % linear fit
 errorbar(bforplot, meanMSDperfishi(bforplot+1), stdMSDperfishi(bforplot+1)./sqrt(nMSDperfishi(bforplot+1)),...
-    'Linewidth', 2, 'Color', colour(2,:), 'DisplayName', '<MSD>_{fish}')
+    'Linewidth', 2, 'Color', colour(2,:), 'DisplayName', '<MSR>_{fish}')
 plot(bforplot, bforplot*MSD_shuff(2),...
-     '--','Color', colour(4,:), 'DisplayName', 'extension of 1st bout')
+     '--','Color', colour(4,:), 'DisplayName', 'purely diffusive process')
  
  linfitMSDpf = polyfit((ll:ul), meanMSDperfishi(ll:ul),1)
 

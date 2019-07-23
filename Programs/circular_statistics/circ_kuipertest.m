@@ -11,7 +11,7 @@ function [pval, k, K] = circ_kuipertest(alpha1, alpha2, res, vis_on)
 %   HA: The two distributions are different.
 %
 % Input: 
-%   alpha1    fist sample (in radians)
+%   alpha1    first sample (in radians)
 %   alpha2    second sample (in radians)
 %   res       resolution at which the cdf is evaluated
 %   vis_on    display graph
@@ -45,8 +45,8 @@ n = length(alpha1(:));
 m = length(alpha2(:));
 
 % create cdfs of both samples
-[phis1 cdf1 phiplot1 cdfplot1] = circ_samplecdf(alpha1, res);
-[foo, cdf2 phiplot2 cdfplot2] = circ_samplecdf(alpha2, res); %#ok<ASGLU>
+[phis1, cdf1, phiplot1, cdfplot1] = circ_samplecdf(alpha1, res);
+[foo, cdf2, phiplot2, cdfplot2] = circ_samplecdf(alpha2, res); %#ok<ASGLU>
 
 % maximal difference between sample cdfs
 [dplus, gdpi] = max([0 cdf1-cdf2]);
@@ -56,7 +56,7 @@ m = length(alpha2(:));
 k = n * m * (dplus + dminus);
 
 % find p-value
-[pval K] = kuiperlookup(min(n,m),k/sqrt(n*m*(n+m)));
+[pval, K] = kuiperlookup(min(n,m),k/sqrt(n*m*(n+m)));
 K = K * sqrt(n*m*(n+m));
 
 
@@ -65,7 +65,7 @@ if vis_on
     figure 
     plot(phiplot1, cdfplot1, 'b', phiplot2, cdfplot2, 'r');
     hold on
-    plot([phis1(gdpi-1), phis1(gdpi-1)], [cdf1(gdpi-1) cdf2(gdpi-1)], 'o:g');
+    plot([phis1(gdpi), phis1(gdpi)], [cdf1(gdpi) cdf2(gdpi)], 'o:g');
     plot([phis1(gdmi-1), phis1(gdmi-1)], [cdf1(gdmi-1) cdf2(gdmi-1)], 'o:g');
     hold off
     set(gca, 'XLim', [0, 2*pi]);

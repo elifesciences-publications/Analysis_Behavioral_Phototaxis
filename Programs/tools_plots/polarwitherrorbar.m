@@ -14,7 +14,7 @@ function [] = polarwitherrorbar(angle,avg,error,fillcolor)
 
 n_data = length(angle);
 
-fake = polar(angle, 0.12*ones(1,n_data)); %max(avg+error)
+fake = polar(angle, ones(1,n_data)); %max(avg+error)
 set(fake,'Visible','off', 'HandleVisibility', 'off'); 
 hold on; 
 

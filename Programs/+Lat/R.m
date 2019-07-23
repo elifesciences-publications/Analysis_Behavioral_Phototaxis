@@ -36,6 +36,9 @@ for i = unique(FishID)'
     Rperfish(i) = circ_r(xfish(:));
     r = [r; cos(circ_mean(xfish')+pi/2)'.*circ_r(xfish')'];
     f = [f; ones(length(fish),1)*i];
+%     polarhistogram(xfish(:))
+%     i
+%     waitforbuttonpress
 end
 Rproj_perfish = Rperfish.*cos(meanX_perfish+pi/2);
 
@@ -95,6 +98,8 @@ nbouts = NaN(length(unique(FishID)),1);
 stdRonseqperfish = NaN(length(unique(FishID)),1);
 meanRonseqperfish = NaN(length(unique(FishID)),1);
 seqperfish = NaN(length(unique(FishID)),1);
+h_mean = NaN(length(unique(FishID)),1);
+pval_nonunif = NaN(length(unique(FishID)),1);
 
 for i = unique(FishID)'
     fish = find(FishID == i);
@@ -107,15 +112,25 @@ for i = unique(FishID)'
     meanXperfish(i) = circ_mean(xfish);
     Rcircperfish(i) = circ_r(xfish);
     nbouts(i) = numel(xfish);
+    
+    [h_mean(i), ~] = circ_mtest(xfish, pi/2);
+    [pval_nonunif(i), ~] = circ_rtest(xfish);
 end
 Rprojperfish = Rcircperfish.*cos(meanXperfish+pi/2);
 meanRprojonseqperfish = meanRonseqperfish.*cos(meanXperfish+pi/2);
 
 %***
 figure
+[sorted_angle, sorted_idx] = sort(meanXperfish);
+polarwitherrorbar(sorted_angle'+pi/2,Rcircperfish(sorted_idx)',stdRonseqperfish',colour(1,:))
+view([90 -90])
+
+%***
+figure
 polarplot(meanXperfish+pi/2, Rcircperfish, 'ko', 'MarkerFaceColor', colour(1,:), 'MarkerSize', 10)
 hold on
-set(gca,'ThetaZeroLocation','bottom',...
+polarplot(meanXperfish+pi/2, meanRonseqperfish, 'ko', 'MarkerFaceColor', colour(1,:)*0.1, 'MarkerSize', 10)
+set(gca,'ThetaZeroLocation','top',...
     'ThetaDir','clockwise')
 ax=gca;
 ax.ThetaAxisUnits = 'radians';
@@ -134,7 +149,7 @@ plot(wrapToPi(meanXperfish+pi/2), Rprojperfish,...
     'ko', 'MarkerFaceColor', colour(1,:), 'MarkerSize', 10, 'DisplayName', 'Mean on all bouts/individual')
 hold on
 errorbar(wrapToPi(meanXperfish+pi/2),meanRprojonseqperfish, stdRonseqperfish./sqrt(seqperfish),...
-    'Color', colour(2,:), 'Marker', '.', 'MarkerEdgeColor', colour(2,:), 'Linewidth', 1.5, 'LineStyle', 'none',...
+    'Color', colour(2,:), 'Marker', 'o', 'MarkerFaceColor', colour(1,:), 'Linewidth', 2, 'LineStyle', 'none',...
     'DisplayName', 'Mean & SEM on different sequences of individuals')
 plot([-pi pi], [0 0], '--k', 'HandleVisibility', 'off');
 plot([0 0], [-1 1], '--k', 'HandleVisibility', 'off');
@@ -145,5 +160,10 @@ xlabel('<\theta>_f_i_s_h')
 ylabel('R_f_i_s_h')
 ax=gca;
 ax.FontName = 'Times New Roman';
-ax.FontSize = 16;
+ax.FontSize = 18;
 
+% Combine non-uniformity with mean direction
+h_nonunif = 1-pval_nonunif;
+h_nonunif(h_nonunif>=0.99) = 1;
+h_nonunif(h_nonunif<0.99) = 0;
+signif_phototaxis = sum(h_mean.*h_nonunif')/length(h_mean);

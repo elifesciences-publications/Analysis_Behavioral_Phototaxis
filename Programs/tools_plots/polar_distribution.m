@@ -36,7 +36,7 @@ names = {['<\theta> = ' num2str(round(wrapToPi(theta_mean)*100)/100) ' rad'],...
 fig = figure;
 
 % --- fake plot to have the same scale ---
-fake = polar(0, 0.15);
+fake = polar(0, 0.25);
 fake.HandleVisibility = 'off';
 hold on
 
@@ -44,10 +44,10 @@ hold on
 polarwitherrorbar([angle, angle(1)], smooth([xmean_fish, xmean_fish(1)])',...
     [ xstd_fish,  xstd_fish(1)]/sqrt(different_fish(end)), colour(5,:));
 hold on
-p1 = polar([angle, angle(1)],smooth([xpdf, xpdf(1)])');
-p1.LineWidth = 2;
-p1.Color =  colour(2,:);
-p1.DisplayName = '<\theta>';
+%p1 = polar([angle, angle(1)],smooth([xpdf, xpdf(1)])');
+%p1.LineWidth = 2;
+%p1.Color =  colour(2,:);
+%p1.DisplayName = '<\theta>';
 
 % --- plot and display the circular mean and R ---
 hold on
@@ -56,8 +56,8 @@ p2.DisplayName = '<R>';
 p2.LineWidth = 2;
 p2.Color =  colour(3,:);
 text(txtRng.*cos(txtAngle),txtRng.*sin(txtAngle), names,...
-    'HorizontalAlignment','center','VerticalAlignment','bottom',...
-    'FontSize', 14, 'FontName', 'Times New Roman')
+   'HorizontalAlignment','center','VerticalAlignment','bottom',...
+   'FontSize', 14, 'FontName', 'Times New Roman')
 
 % --- polar plot parameters ---
 theta_ticks_to_remove = {'30','60','120','150','210','240','300','330'};

@@ -8,7 +8,7 @@ C = DIlr;
 
 binsdXdX = 9;
 binspflip = 7;
-Lat.auto_co_reinforcement(dX, dXissbiais, C, binsdXdX, binspflip, 1, 'absolute')
+Lat.auto_co_reinforcement(dX, dXissbiais, C, binsdXdX, binspflip, 0, 'absolute')
 
 %% Autocorrelation in coherence/conflict situations : NOT INTERESTING
 dC = diff(DIlr,1,2);

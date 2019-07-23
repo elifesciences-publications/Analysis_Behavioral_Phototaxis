@@ -1,4 +1,4 @@
-function [pval z] = circ_rtest(alpha, w, d)
+function [pval, z] = circ_rtest(alpha, w, d)
 %
 % [pval, z] = circ_rtest(alpha,w)
 %   Computes Rayleigh test for non-uniformity of circular data.

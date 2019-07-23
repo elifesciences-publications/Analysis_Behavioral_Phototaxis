@@ -1,13 +1,15 @@
 
 colour = colour_palette(0,3);
 %% Drift of all data
+medboutsperseq = median(size(XLat,2) - sum(isnan(XLat),2));
+
 relC = DIlr(:,1:medboutsperseq);
-Vart1 = relC;
-Vart2 = (dXLssbiais(:,1:medboutsperseq));
+Var1 = relC;
+Var2 = (dXLssbiais(:,1:medboutsperseq));
 b=7;
 
 % --- bins with equal number of elements
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, b, b+3);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, b, b+3);
 mV2 = nanmean(v2bin,2);
 mV2sq = nanmean(v2bin.^2,2);
 
@@ -57,16 +59,20 @@ ax = gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
 
+% --- significance test ---
+signif_val = 1e-12;
+[pm, pv] = mean_var_testing(Var1, Var2, b, signif_val)
+
 %% Drift of all data : ABSOLUTE contrast
 relC = DIlr(:,1:17);
 absC = abs(relC);
-Vart1 = absC;
-Vart2 = (dXLssbiais(:,1:17));
-Vart2(relC<0) = - Vart2(relC<0);
+Var1 = absC;
+Var2 = (dXLssbiais(:,1:medboutsperseq));
+Var2(relC<0) = - Var2(relC<0);
 b=6;
 
 % --- bins with equal number of elements
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, b, b+3);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, b, b+3);
 mV2 = nanmean(v2bin,2);
 mV2sq = nanmean(v2bin.^2,2);
 
@@ -116,15 +122,76 @@ ax = gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
 
+%% Drift on data per fish
+relC = DIlr(:, 1:end-1);
+Var1 = relC;
+Var2 = (dXLssbiais(:,1:medboutsperseq));
+Var2 = (dXLssbiais);
+
+b=12;
+
+fish = unique(FishID);
+alpha = NaN(length(fish),1);
+alphaci = NaN(length(fish),2);
+medboutsperfish = NaN(length(fish),1);
+minboutsperfish = NaN(length(fish),1);
+maxboutsperfish = NaN(length(fish),1);
+
+figure;
+hold on
+for i = 1:length(fish)
+    seqafish = (FishID == i);
+    var1 = Var1(seqafish,:);
+    var2 = Var2(seqafish,:);
+    if length(var1(:)) - sum(isnan(var1(:))) < b+2
+        continue
+    end
+    [binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, b, b+2);
+    mV2 = nanmean(v2bin,2);
+    
+    plot(binvals, mV2)
+    linfittype = fittype('a*x','coefficients', {'a'});
+    myfit = fit(binvals, mV2, linfittype);
+    alpha(i) = myfit.a;
+    alphaci(i,:) = confint(myfit)';
+    medboutsperfish(i) = median(size(var1,2) - sum(isnan(var1),2));
+    minboutsperfish(i) = min(size(var1,2) - sum(isnan(var1),2));
+    maxboutsperfish(i) = max(size(var1,2) - sum(isnan(var1),2));
+end
+
+%***
+figure;
+plot(fish, alpha, 'o')
+legend
+ax = gca;
+ax.FontSize = 14;
+ax.FontName = 'Times New Roman';
+
+figure;
+errorbar(medboutsperfish, alpha, alpha-alphaci(:,1), alphaci(:,2)-alpha, minboutsperfish, maxboutsperfish,...
+    'o', 'LineWidth', 1.5, 'Color', 'k', 'MarkerSize', 6, 'MarkerEdgeColor', 'k', 'MarkerFaceColor', 'r')
+ax = gca;
+ax.XScale = 'log';
+ax.FontSize = 16;
+ax.FontName = 'Times New Roman';
+xlabel('median number of bouts per fish')
+
+figure
+plot(alpha, Rprojperfish, 'sq')
+ax = gca;
+ax.FontSize = 16;
+ax.FontName = 'Times New Roman';
+
+
 %% Drift of all data : THETA
-ThetaSel = XLat(:,1:17);
+ThetaSel = XLat(:,1:medboutsperseq);
 ThetaSel = wrapTo2Pi(ThetaSel)-pi;
-Vart1 = ThetaSel;
-Vart2 = (dXLssbiais(:,1:17));
+Var1 = ThetaSel;
+Var2 = (dXLssbiais(:,1:medboutsperseq));
 b=12;
 
 % --- bins with equal number of elements
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, b, b+3);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, b, b+3);
 mV2 = nanmean(v2bin,2);
 mV2sq = nanmean(v2bin.^2,2);
 
@@ -178,16 +245,16 @@ ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
 
 %% --- drift in time (A)
-tbinning = 1:100;
-win = 5;
+tbinning = 1:50;
+win = 1;
 
-Vart1 = DIlr(:,1:end-1)/(max(abs(DIlr(:))));
-Vart2 = dXl;
+Var1 = DIlr(:,1:end-1)/(max(abs(DIlr(:))));
+Var2 = dXl;
 
 acoeff = NaN(size(tbinning));
 for i = 1 : length(tbinning)-1
-    vart1 = Vart1(:,tbinning(i):tbinning(i)+win);
-    vart2 = Vart2(:,tbinning(i):tbinning(i)+win);
+    vart1 = Var1(:,tbinning(i):tbinning(i)+win);
+    vart2 = Var2(:,tbinning(i):tbinning(i)+win);
     b=7;
     
     % --- bins with equal number of elements
@@ -203,14 +270,21 @@ for i = 1 : length(tbinning)-1
 end
 figure;
 plot(acoeff, 'LineWidth', 1.5)
-xlabel('from bout #')
-title(['bias coefficient on ' num2str(win) ' bouts window'])
+hold on
+plot(smooth(acoeff,5), 'LineWidth', 1.5)
+xlabel('bout #')
+ylabel('\alpha')
+title(['bias coefficient on ' num2str(win) ' bouts window (smoothed over 5 bouts)'])
+ax = gca;
+ax.XScale = 'lin';
+ax.FontSize = 16;
+ax.FontName = 'Times New Roman';
 
 %% --- fit the distribution of dX with a double-gaussian ---
-Vart1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
-Vart2 = dXLssbiais(:,1:17);
+Var1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
+Var2 = dXLssbiais(:,1:17);
 
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 7, 9);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 7, 9);
 mV2 = nanmean(v2bin,2);
 mV2sq = nanvar(v2bin,1,2);
 
@@ -308,17 +382,23 @@ title('turns/forward')
 
 
 %% --- fit the distribution of dX with a CUSTOM double-gaussian ---
-Vart1 = DIlr(:,1:17)/(max(abs(DIlr(:))));
-Vart2 = dXLssbiais(:,1:17);
+Var1 = DIlr(:,1:17)/(max(abs(DIlr(:))));
+Var2 = dXLssbiais(:,1:17);
 
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 7, 9);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 7, 9);
+
 mV2 = nanmean(v2bin,2);
+sV2 = nanstd(v2bin,1,2);
+maV2 = nanmean(abs(v2bin),2);
+saV2 = nanstd(abs(v2bin),1,2);
+
 a = nan(size(v2bin,1),1);
 mut = nan(size(v2bin,1),1);
 sigmat = nan(size(v2bin,1),1);
 muf = nan(size(v2bin,1),1);
 sigmaf = nan(size(v2bin,1),1);
 aconfint = nan(size(v2bin,1),2);
+aconfint68 = nan(size(v2bin,1),2);
 muconfint = nan(size(v2bin,1),2);
 sigmaconfint = nan(size(v2bin,1),2);
 figure
@@ -339,7 +419,6 @@ for i = 1 : size(v2bin, 1)
     myfit = fit(x_histogram',dx_histogram',myfittype, 'startpoint', [0.5 0 0.7], 'Upper', [1 Inf 0.9], 'problem', {muf, sigmaf});%
     
     plot(myfit, x_histogram, dx_histogram)
-    %waitforbuttonpress
     a(i) = myfit.a;
     mut(i) = myfit.mut;
     sigmat(i) = myfit.sigmat;
@@ -349,6 +428,9 @@ for i = 1 : size(v2bin, 1)
     aconfint(i,:) = ci(:,1)';
     muconfint(i,:) = ci(:,2)';
     sigmaconfint(i,:) = ci(:,3)';
+    
+    ci = confint(myfit,0.68);
+    aconfint68(i,:) = ci(:,1)';
 end
 %plot(binvals, a.*sigmat./(a.*sigma1+a2.*sigma2))
 figure
@@ -384,15 +466,32 @@ ax = gca;
 ax.FontName = 'Times New Roman';
 ax.FontSize = 20;
 
-%% --- fit the distribution of dX with a CUSTOM double-gaussian (2) : ABSOLUTE CONTRAST---
-Vart1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
-Vart2 = dXLssbiais(:,1:17);
-Vart2(Vart1<0) = -Vart2(Vart1<0);
-Vart1 = abs(Vart1);
+% percentage of turns in one direction
+w = mV2./a./maV2;
+dw = w.* sqrt ( (sV2./mV2).^2 +  ( (a-aconfint68(:,1))/2./a ).^2 + (saV2./maV2).^2 );
 
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Vart1, Vart2, 5, 8);
+%***
+figure
+errorbar(binvals, w, dw/sqrt(elts_per_bin),...
+    'LineWidth', 1.5, 'Color', colour(3,:))
+xlabel('C_{rel}')
+ylabel('<\delta\theta>/(p_{turn}<|\delta\theta|>)')
+title('proportion of biased turns')
+ylim([-1.2 1.2])
+ax = gca;
+ax.FontName = 'Times New Roman';
+ax.FontSize = 20;
+
+%% --- fit the distribution of dX with a CUSTOM double-gaussian (2) : ABSOLUTE CONTRAST---
+Var1 = DIlr(:, 1:17)/(max(abs(DIlr(:))));
+Var2 = dXLssbiais(:,1:17);
+Var2(Var1<0) = -Var2(Var1<0);
+Var1 = abs(Var1);
+
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 5, 8);
 
 mV2 = nanmean(v2bin,2);
+
 a = nan(size(v2bin,1),1);
 mut = nan(size(v2bin,1),1);
 sigmat = nan(size(v2bin,1),1);
@@ -401,6 +500,7 @@ sigmaf = nan(size(v2bin,1),1);
 aconfint = nan(size(v2bin,1),2);
 muconfint = nan(size(v2bin,1),2);
 sigmaconfint = nan(size(v2bin,1),2);
+%***
 figure
 for i = 1 : size(v2bin, 1)
     v = (v2bin(i,:));
@@ -422,13 +522,13 @@ for i = 1 : size(v2bin, 1)
     %waitforbuttonpress
     a(i) = myfit.a;
     mut(i) = myfit.mut;
-   sigmat(i) = myfit.sigmat;
+    sigmat(i) = myfit.sigmat;
 %     muf(i) = myfit.muf;
 %     sigmaf(i) = myfit.sigmaf;
     ci = confint(myfit,0.99);
     aconfint(i,:) = ci(:,1)';
     muconfint(i,:) = ci(:,2)';
-   sigmaconfint(i,:) = ci(:,3)';
+    sigmaconfint(i,:) = ci(:,3)';
 end
 %plot(binvals, a.*sigmat./(a.*sigma1+a2.*sigma2))
 figure
@@ -459,6 +559,17 @@ errorbar(binvals, a, a-aconfint(:,1), aconfint(:,2)-a,...
 xlabel('C_{rel}')
 title('p_{turn} estimate ci99%')
 ylim([0 1])
+
+%***
+figure
+errorbar(abs(binvals), mut, mut-muconfint(:,1), muconfint(:,2)-mut,...
+    'LineWidth', 1.5, 'Color', colour(3,:), 'DisplayName', '\mu_{turn} estimate')
+xlabel('C_{abs}')
+title('\mu')
+ylim auto
+legend
+
+
 %% create drift matrix
 Contrasts = DIlr(:,1:23)/max(abs(DIlr(:)));
 A = Contrasts*Acoeff;

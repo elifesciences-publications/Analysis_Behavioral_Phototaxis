@@ -45,6 +45,9 @@ for e = 1 : length(Char)
     E(e).R = R;
     E(e).TimeBout = TimeBout;
     E(e).T = T;
+    E(e).a =  xCoord;
+    E(e).b = yCoord;
+    E(e).alpha = Xlab;
 end
 
 save([path 'temporal_exps.mat'], 'E')

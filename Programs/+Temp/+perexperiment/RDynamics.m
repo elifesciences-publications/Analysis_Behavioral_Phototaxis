@@ -25,16 +25,16 @@ ms6 = circ_mean(s6_x, [], 1);
 me6 = circ_mean(e6_x, [], 1);
 me3 = circ_mean(e3_x, [], 1);
 
-Rps6 = Rs6.*cos(ms6-pi);
-Rpe6 = Re6.*cos(me6-pi);
-Rpe3 = Re3.*cos(me3-pi);
+Rps6 = smooth(Rs6.*cos(ms6-pi),3);
+Rpe6 = smooth(Re6.*cos(me6-pi),3);
+Rpe3 = smooth(Re3.*cos(me3-pi),3);
 
 %***
 f = figure;
-plot(Rs6, 'Linewidth', 2, 'DisplayName', 'sin60', 'Color', colour(1,:))
+plot(Rps6, 'Linewidth', 2, 'DisplayName', 'sin60', 'Color', colour(1,:))
 hold on
-plot(Re6, 'Linewidth', 2, 'DisplayName', 'exp60', 'Color', colour(2,:))
-plot(Re3, 'Linewidth', 2, 'DisplayName', 'exp30', 'Color', colour(3,:))
+plot(Rpe6, 'Linewidth', 2, 'DisplayName', 'exp60', 'Color', colour(2,:))
+plot(Rpe3, 'Linewidth', 2, 'DisplayName', 'exp30', 'Color', colour(3,:))
 title('mean resultant vector length (moment) R')
 legend
 xlim([0 100])

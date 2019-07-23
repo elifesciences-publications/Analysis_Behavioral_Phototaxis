@@ -1,8 +1,9 @@
 
 
 %% Visualizations for individual fish
+uniquefish = unique(FishNi)';
 if logical(visu)
-    for i = unique(FishNi)'
+    for i = uniquefish(2:end)
         fish = find(FishNi == i);
         %         h = figure;
         %         subplot(3,2,1)

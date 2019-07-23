@@ -12,11 +12,11 @@ Larg = NaN(N,1);
 long = NaN(N,1);
 for EXP = 1:N
     if EXP == 1
-        [Dates, Fish, exptype, ~, intmax] = Temp.chooseExpType('exp60');
+        [Dates, Fish, exptype, ~, intmax] = Temp.perexperiment.choose_experiment('exp60');
     elseif EXP == 2
-        [Dates, Fish, exptype, ~, intmax] = Temp.chooseExpType('exp30');
+        [Dates, Fish, exptype, ~, intmax] = Temp.perexperiment.choose_experiment('exp30');
     elseif EXP ==3
-        [Dates, Fish, exptype, ~, intmax] = Temp.chooseExpType('sin60');
+        [Dates, Fish, exptype, ~, intmax] = Temp.perexperiment.choose_experiment('sin60');
     elseif EXP == 4
         Lat.DatesFish;
         intmax = 0;

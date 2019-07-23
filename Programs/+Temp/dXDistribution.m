@@ -1,29 +1,32 @@
 
+
+colour = colour_palette(0,4);
+
 %% BUILT-IN double gaussian fit on dX
 
 % variables
 Var1 = dLum(:, 1:mednbouts)./( (Lum(:, 1:mednbouts)+ Lum(:, 2:mednbouts+1))./2 ) ;
 Var2 = dX(:, 2:mednbouts+1);
 dX(dX==0)=NaN;
-[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Var1, Var2, 21, 24);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 21, 24);
 
-f1 = NaN(size(v2bin_pos,1), 3);
-f2  = NaN(size(v2bin_pos,1), 3);
-nf = NaN(size(v2bin_pos,1), 1);
-nt = NaN(size(v2bin_pos,1), 1);
-ci1low = NaN(size(v2bin_pos,1), 3);
-ci1high = NaN(size(v2bin_pos,1), 3);
-ci2low = NaN(size(v2bin_pos,1), 3);
-ci2high = NaN(size(v2bin_pos,1), 3);
+f1 = NaN(size(v2bin,1), 3);
+f2  = NaN(size(v2bin,1), 3);
+nf = NaN(size(v2bin,1), 1);
+nt = NaN(size(v2bin,1), 1);
+ci1low = NaN(size(v2bin,1), 3);
+ci1high = NaN(size(v2bin,1), 3);
+ci2low = NaN(size(v2bin,1), 3);
+ci2high = NaN(size(v2bin,1), 3);
 %***
 figure
 hold on
-for i = 1 : size(v2bin_pos,1)
-    c = range(v2bin_pos(i,:));
+for i = 1 : size(v2bin,1)
+    c = range(v2bin(i,:));
     if c == 0
         c =1;
     end
-    [dx_histogram, x_histogram] = hist(v2bin_pos(i,:), c/2*round(sqrt(elts_per_bin)));
+    [dx_histogram, x_histogram] = hist(v2bin(i,:), c/2*round(sqrt(elts_per_bin)));
     f = fit(x_histogram.',dx_histogram.','gauss2');
     forward = @(x) f.a1*exp(-((x-f.b1)/f.c1).^2);
     side = @(x) f.a2*exp(-((x-f.b2)/f.c2).^2);
@@ -59,9 +62,9 @@ hold on
 plot([binvals(1)*1.05 binvals(end)*1.05], [0.69 0.69],...
     'k--', 'DisplayName', '\sigma_{turn} neutral')
 errorbar(binvals/max(abs(binvals)), f1(:,3), f1(:,3)-ci1low(:,3), -f1(:,3)+ci1high(:,3),...
-    'Color', [0.3 0.6 0.7], 'Linewidth', 1.5, 'DisplayName', '\sigma_{scoot} \pm ci99%')
+    'Color', colour(4,:), 'Linewidth', 1.5, 'DisplayName', '\sigma_{scoot} \pm ci99%')
 plot([binvals(1)*1.1 binvals(end)*1.1], [0.12 0.12],...
-    '--', 'Color', [0.3 0.6 0.7], 'DisplayName', '\sigma_{scoot} neutral')
+    '--', 'Color', colour(2,:), 'DisplayName', '\sigma_{scoot} neutral')
 
 ylabel('<\sigma>')
 ax=gca;
@@ -95,33 +98,31 @@ title('')
 % variables
 Var1 = dLum(:, 1:mednbouts)./( (Lum(:, 1:mednbouts)+ Lum(:, 2:mednbouts+1))./2 ) ;
 Var2 = dX(:, 2:mednbouts+1);
-dX(dX==0)=NaN;
-[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Var1, Var2, 24, 27);
 
-wturn = nan(1, size(v2bin_pos,1));
-wfor = nan(1, size(v2bin_pos,1));
-pturn = nan(1, size(v2bin_pos,1));
-pfor = nan(1, size(v2bin_pos,1));
-ci = nan(size(v2bin_pos,1), 2);
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 12, 18);
 
-for i = 1 : size(v2bin_pos,1)
-    selection = v2bin_pos(i,:);
+wturn = nan(1, size(v2bin,1));
+wfor = nan(1, size(v2bin,1));
+pturn = nan(1, size(v2bin,1));
+pfor = nan(1, size(v2bin,1));
+sep = nan(size(v2bin,1),1);
+sewt = nan(size(v2bin,1),1);
+sewf = nan(size(v2bin,1),1);
+
+for i = 1 : size(v2bin,1)
+    selection = v2bin(i,:);
     selection(abs(selection)>pi) = NaN;
-    [wturn(i), wfor(i), pturn(i), pfor(i), ci(i,:)] = Gauss2custom(selection ); % /!\ !!!!!
+    [wturn(i), wfor(i), pturn(i), pfor(i), sep(i), sewt(i), sewf(i)] = Gauss2custom(selection );
 end
-
-%proba min and max
-ci(ci>1)=1;
-ci(ci<0)=0;
     
 %  (2) <dX2>
 %***
 fig = figure;
-errorbar(binvals/max(abs(binvals)), wturn, zeros(length(wturn),1), zeros(length(wturn),1),...
-    'k-', 'Linewidth', 1.5)
+errorbar(binvals/max(abs(binvals)), wturn, sewt, ...
+    'sq-', 'Color', colour(2,:), 'Linewidth', 1.5)
 hold on
-errorbar(binvals/max(abs(binvals)), wfor, zeros(length(wfor),1), zeros(length(wfor),1),...
-    'Color', [0.3 0.6 0.7], 'Linewidth', 1.5)
+errorbar(binvals/max(abs(binvals)), wfor, sewf,...
+    'sq-', 'Color', colour(4,:), 'Linewidth', 1.5)
 ylim([0 1.5])
 ylabel('<\delta\theta^2>')
 xlim([binvals(1)*1.1 binvals(end)*1.1])
@@ -129,18 +130,20 @@ xlabel('relative contrast dI/I')
 title({'Mean bout variance',...
     'from custom double gaussian fit'}')
 
-legend('<\delta\theta^2>_t_u_r_n', '<\delta\theta^2>_s_c_o_o_t')
+legend('<\delta\theta^2>_{turn}', '<\delta\theta^2>_{scoot}')
 
 ax=gca;
-ax.FontSize = 14;
+ax.FontSize = 18;
 ax.FontName = 'Times New Roman';
-ax.FontWeight = 'bold';
 
 %  (3) P(turn)
 %***
 figure
-errorbar(binvals/max(abs(binvals)), pturn, pturn'-ci(:,1), ci(:,2)-pturn',...
-    'k-sq', 'Markersize', 6, 'MarkerFaceColor', 'k')
+plot([-0.85 1.02], [0.4089 0.4089], '--', 'LineWidth', 1.5, 'Color', colour(5,:))
+hold on
+errorbar(binvals/max(abs(binvals)), pturn, sep,...
+    'k-sq', 'Markersize', 6, 'MarkerFaceColor', colour(2,:), 'LineWidth', 1.5)
+legend('Neutral', 'Temporal stimulus')
 ylim([0 1])
 ylabel('P(turn)')
 ax = gca;
@@ -148,27 +151,32 @@ ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
 ax.FontWeight = 'bold';
 title('')
+ax=gca;
+ax.FontSize = 18;
+ax.FontName = 'Times New Roman';
 
-%% --- fit the distribution of dX with a CUSTOM double-gaussian ---
+%% --- fit the distribution of dX with a CUSTOM double-gaussian with constrained mean and sigma ---
 colour = colour_palette(0,4);
 colour_spont = colour_palette(0,1);
 
 Var1 = dLum(:, 1:mednbouts)./( (Lum(:, 1:mednbouts)+ Lum(:, 2:mednbouts+1))./2 ) ;
-Var1(Var1==0)=NaN;
-Var2 = dX(:, 2:mednbouts+1);
-%Vart2(abs(Vart2)>pi)=NaN;
+%Var1 = dLum(:, 1:end-1)./( (Lum(:, 1:end-2)+ Lum(:, 2:end-1))/2 ) ;
+Var1(Var1 == 0)=NaN;
 
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 25, 30);
+Var2 = dX(:, 2:mednbouts+1);
+
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(Var1, Var2, 12, 18);
 mV2 = nanmean(v2bin,2);
 a = nan(size(v2bin,1),1);
 mut = nan(size(v2bin,1),1);
 sigmat = nan(size(v2bin,1),1);
-muf = nan(size(v2bin,1),1);
-sigmaf = nan(size(v2bin,1),1);
 aconfint = nan(size(v2bin,1),2);
 muconfint = nan(size(v2bin,1),2);
 sigmaconfint = nan(size(v2bin,1),2);
+
 figure
+muf = 0;
+sigmaf = 0.12;
 for i = 1 : size(v2bin, 1)
     v = (v2bin(i,:)); 
     v = v(:);
@@ -179,21 +187,19 @@ for i = 1 : size(v2bin, 1)
     [dx_histogram, x_histogram]  = histcounts(v,bins);
     x_histogram = x_histogram(1:end-1) + binwidth/2;
     dx_histogram = dx_histogram/(sum(dx_histogram)*binwidth);
-    muf = 0;
-    sigmaf = 0.12;
     myfittype = fittype('sum_gauss_constr(x, a, mut, sigmat, muf, sigmaf)',...
-        'coefficients', {'a','mut','sigmat'}, 'problem', {'muf', 'sigmaf'});
-    myfit = fit(x_histogram',dx_histogram',myfittype, 'startpoint', [0.5 0 0.7], 'problem', { muf, sigmaf});
+        'coefficients', {'a','sigmat','mut'}, 'problem', {'muf', 'sigmaf'});
+    myfit = fit(x_histogram',dx_histogram',myfittype, 'startpoint', [0.5 0.7 0], 'problem', {muf, sigmaf});
     
     plot(myfit, x_histogram, dx_histogram)
     %waitforbuttonpress
     a(i) = myfit.a;
     mut(i) = myfit.mut;
     sigmat(i) = myfit.sigmat;
-    ci = confint(myfit,0.99);
-    aconfint(i,:) = ci(:,1)';
-    muconfint(i,:) = ci(:,2)';
-    sigmaconfint(i,:) = ci(:,3)';
+    sep = confint(myfit,0.95);
+    aconfint(i,:) = sep(:,1)';
+    sigmaconfint(i,:) = sep(:,2)';
+    muconfint(i,:) = sep(:,3)';
 end
 
 figure

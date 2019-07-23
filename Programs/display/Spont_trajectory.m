@@ -7,7 +7,7 @@ timemin = 3;
 minBoutNumber = 3;
 
 path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/PooledData/';
-name = 'PooledSpont.mat';
+name = 'spontaneous_swim.mat';
 
 load([path name], 'Es')
 
@@ -62,11 +62,6 @@ ylim(yl)
 xlabel('mm')
 ylabel('mm')
 
-%% save figure
-figpath = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/Figures201808/';
-name = ['spontaneous_trajectory_xytheta'];
-%saveFigurePDF(fig, figpath, name)
-saveas(fig,[figpath name],'fig')
 %% 
 % --- in time ---
 loadplease = 1;

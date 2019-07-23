@@ -79,30 +79,10 @@ figure;
 errorbar(binvals, mv2, stdv2/sqrt(elts_per_bin),...
     'Color', colour(2,:), 'LineWidth', 1.5, 'DisplayName', 'all bouts')
 
-% --- only turns ---
-dXt = dXissbiais(:,1:end-1);
-dXtp1 = dXissbiais(:,2:end);
-dXt(abs(dXt)<0.2) = NaN;
-dXtp1(abs(dXtp1)<0.2) = NaN;
+%% --- only turns trinarized ---
+turn_thresh = 0.22;
+dX = dXissbiais;
 
-pdXndXnp1 = dXt.*dXtp1;
-pabsdXndXnp1 = abs(dXt).*abs(dXtp1);
+[fig1, fig2] = Spont.autocorrelationVSinterboutinterval(dX, IBIi, turn_thresh, 'data ' );
 
-var1 = IBIi(:,1:end-1);
-var2 = pdXndXnp1./pabsdXndXnp1;
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 7, 12);
-mv2 = mean(v2bin,2);
-stdv2 = std(v2bin,1,2);
 
-%*** 
-%figure;
-hold on
-errorbar(binvals, mv2, stdv2/sqrt(elts_per_bin),...
-    'Color', colour(3,:), 'LineWidth', 1.5, 'DisplayName', 'turns only |d\theta|>0.2rad')
-xlabel('inter-bout interval (sec)')
-ylabel('\delta\theta_n\delta\theta_{n+1}/|\delta\theta_n||\delta\theta_{n+1}|')
-
-legend
-ax=gca;
-ax.FontName = 'Times New Roman';
-ax.FontSize = 14;

@@ -81,7 +81,7 @@ ax.FontSize = 14;
 
 %% Pflip
 
-flips = 0.5*(1 - Prodn_np1./(0.5*Absn_np1));
+flips = 0.5*(1 - Prodn_np1./(0.7*Absn_np1));
 [binvalsA, elts_per_binA, pflipReinf] = BinsWithEqualNbofElements(Contrast_np1(reinf), flips(reinf), bins2, bins2);
 [binvalsB, elts_per_binB, pflipInhib] = BinsWithEqualNbofElements(Contrast_np1(inhib), flips(inhib), bins2, bins2);
 

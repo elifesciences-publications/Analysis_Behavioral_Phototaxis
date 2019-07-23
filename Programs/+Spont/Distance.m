@@ -31,6 +31,21 @@ ylabel('pdf')
 ax = gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
+title('lognorm')
+
+% gamma
+x = 0 :0.1: max(dist(:));
+phat = gamfit(dist);
+y = gampdf(x, phat(1), phat(2));
+
+%***
+figure;
+histogram(dist, 'Normalization', 'pdf')
+hold on
+plot(x, y)
+xlabel('mm')
+ylabel('pdf')
+title('gamma')
 %% mean/median distance in time
 
 dtimemean = nanmean(Disti,2);
@@ -121,8 +136,8 @@ for i = 1 : size(v2bin,1)
     xhist=edges(1:end-1)+binwidth/2;
     yhist=yhist/(sum(yhist)*binwidth);
     
-    distfittype = fittype('1./(x*sigma*sqrt(2*pi)) .* exp(-(log(x)-mu).^2/(2*sigma^2))',...
-        'coefficients', {'mu', 'sigma'});
+    distfittype = fittype('0.9./(x*sigma*sqrt(2*pi)) .* exp(-(log(x)-mu).^2/(2*sigma^2))',...
+        'coefficients', { 'mu', 'sigma'});
     myfit = fit(xhist(2:end)',yhist(2:end)',distfittype, 'startpoint', [1 1]);
     
     figure;
@@ -140,6 +155,49 @@ errorbar(binvals, mud(:,1), mud(:,2)-mud(:,1), mud(:,1)-mud(:,3),...
 hold on
 errorbar(binvals, sigmad(:,1), sigmad(:,2)-sigmad(:,1), sigmad(:,1)-sigmad(:,3),...
     'LineWidth', 1.5, 'DisplayName', '\sigma')
+legend
+xlabel('\delta\theta_n')
+ylabel('d_n')
+ax=gca;
+ax.FontSize = 14;
+ax.FontName = 'Times New Roman';
+
+%% Try with Gamma distribution
+var1 = dXi;
+var2 = Disti/11.5;
+
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 9, 12);
+mv2 = median(v2bin,2);
+stdv2 = std(v2bin,1,2);
+
+%*** 
+%figure;
+errorbar(binvals, mv2, stdv2/sqrt(elts_per_bin),...
+    'LineWidth', 1.5, 'DisplayName', 'median')
+
+mud = NaN(size(v2bin,1),1);
+sigmad = NaN(size(v2bin,1),1);
+phat = NaN(size(v2bin,1),2);
+x = 0:0.1:150;
+for i = 1 : size(v2bin,1)
+    dist = v2bin(i,:);
+    phat(i,:) = gamfit(dist);
+    y = gampdf(x, phat(i,1), phat(i,2));
+        
+    figure;
+    histogram(dist, 'Normalization', 'pdf')
+    hold on
+    plot(x, y)
+end
+
+%***
+figure
+plot(binvals, phat(:,1),...
+    'LineWidth', 1.5, 'DisplayName', '1')
+hold on
+plot(binvals, phat(:,2),...
+    'LineWidth', 1.5, 'DisplayName', '2')
+
 legend
 xlabel('\delta\theta_n')
 ylabel('d_n')

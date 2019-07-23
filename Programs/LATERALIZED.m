@@ -25,8 +25,8 @@ seqPerFish = histc(FishID, unique(FishID));
 NFish = length(seqPerFish);
 meanNofSeqPerFish = mean(seqPerFish);
 
-NofSeqs = size( XLat, 1 );
-boutsPerSeq = size( XLat, 2 ) - sum(isnan(XLat),2);
+NofSeqs = size(XLat, 1);
+boutsPerSeq = size(XLat, 2) - sum(isnan(XLat),2);
 maxnseq = max(seqPerFish);
 medboutsperseq = median(boutsPerSeq);
 
@@ -113,6 +113,8 @@ colourID = 3;
 [fig] = polar_distribution(XLat+pi/2, Nbins, FishID, colourID);
 
 [figsub] = polar_distribution(XLat(:,2:17)+pi/2, Nbins, FishID, colourID);
+[figsub] = polar_distribution(xfish+pi/2, Nbins, 1:20, colourID);
+
 
 [figsub2] = polar_distribution(XLat(:,2:boutsPerSeq)+pi/2, Nbins, FishID, colourID);
 
@@ -216,10 +218,41 @@ title('regularly interspaced bins')
 
 %% model : stationary distribution
 
-interval = 0 : 0.01 : pi;
-[A] = Lat.get_drift_for_theta(interval);
-plot(interval, exp(-A/Dcoeff.*interval.^2))
+interval = 0 : 0.05 : pi;
+A = 0.11;
+Dcoeff = 0.3;
 
+Pdistr = exp(-A/Dcoeff.*interval.^2);
+norm = trapz(interval, Pdistr);
+
+%***
+figure
+subplot(2,1,1)
+histogram(abs(wrapToPi(XLat(:,1:medboutsperseq)+pi/2)),interval, 'Normalization', 'pdf');
+hold on
+plot( interval, 0.7*Pdistr/norm)
 xticks([0,pi/2, pi, 3*pi/2, 2*pi])
-xticklabels({'0','\pi/2', '\pi', '3\pi/2', '2\pi'})
+xticklabels({'0','\pi/2', '\pi'})
 legend('exp(-\theta^2*A/D)')
+
+subplot(2,1,2)
+theta = wrapToPi(XLat(:,1:medboutsperseq)+pi/2);
+polarhistogram(theta(:), 'Normalization', 'pdf');
+hold on
+polarplot([-interval NaN interval], [0.35*Pdistr/norm NaN 0.35*Pdistr/norm])
+
+%% trajectory visualization
+xCoord0 = (xCoord-xCoord(:,1))/pxmm;
+yCoord0 = (yCoord-yCoord(:,1))/pxmm;
+rho = sqrt( (xCoord0).^2 + (yCoord0).^2 );
+
+x = xCoord0.*cos(-wrapToPi(XLat(:,1))+Xlab(:,1)) - yCoord0.*sin(-wrapToPi(XLat(:,1)) + Xlab(:,1));
+y = xCoord0.*sin(-wrapToPi(XLat(:,1))+Xlab(:,1)) + yCoord0.*cos(-wrapToPi(XLat(:,1)) + Xlab(:,1));
+plot(x',y','.-')
+title('source to the top')
+
+
+%***
+figure
+adv = Advancement;
+polarplot(XLat, [1:size(XLat,2)])

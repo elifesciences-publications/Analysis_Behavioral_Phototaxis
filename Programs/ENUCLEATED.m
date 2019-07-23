@@ -25,28 +25,46 @@ title('distance/bout (px)')
 Vart1_b = dLum(:, 1:end-1)./( (Luminosity(:, 1:end-2)+ Luminosity(:, 2:end-1))./2 ) ;
 xl = '\deltaI/I_{n-1}';
 Vart2 = dX(:, 2:end).^2;
-Vart2(Vart2>30) = NaN;
-b = 9;
+b = 12;
 yl = '<\delta\theta^2>_n';
 
 [binvals, elts_per_bin, v2bin, ~, binedges] = BinsWithEqualNbofElements(Vart1_b, Vart2, b, b+10);
 
-s3 = std(v2bin,1,2);
-b3 = binvals;
+iszero = find(binvals==0);
+v2bin_onezerobin = v2bin;
+v2bin_onezerobin(iszero(1),:)= mean(v2bin(iszero,:));
+v2bin_onezerobin(iszero(2:end),:) = [];
+binvals(iszero(2:end)) = [];
+binedges(iszero(2:end)) = [];
 
 %***
 f = figure;
-errorbar(binvals,  mean(v2bin, 2), std(v2bin,1,2)/sqrt(elts_per_bin), std(v2bin,1,2)/sqrt(elts_per_bin),...
+errorbar(binvals,  mean(v2bin_onezerobin, 2), std(v2bin_onezerobin,1,2)/sqrt(elts_per_bin), std(v2bin_onezerobin,1,2)/sqrt(elts_per_bin),...
     diff(binedges)/4, diff(binedges)/4, 'k', 'Linewidth', 1.5)
 hold on
-plot([binvals(1)*1.5, binvals(end)], [0.18 0.18], 'k--')
-xlim([min(binvals)*1.2 max(binvals)*1.2])
+plot([binvals(1)*1.8, binvals(end)*1.8], [0.18 0.18], 'k--')
+xlim([min(binvals)*1.8 max(binvals)*1.8])
 xticks([-1:0.5:1.5])
 xlabel(xl)
 ylabel(yl)
 ax=gca;
 ax.FontSize = 14;
 ax.FontName = 'Times New Roman';
+
+%--- stat test ---
+h = NaN(size(v2bin_onezerobin,1));
+p = NaN(size(v2bin_onezerobin,1));
+for i = 1 : size(v2bin_onezerobin,1)
+    for j = 1 : size(v2bin_onezerobin,1)
+        [h(i,j), p(i,j)] = ttest2(v2bin_onezerobin(i,:),v2bin_onezerobin(j,:));
+    end
+end
+
+%***
+figure
+heatmap(binvals, binvals, round(p,2))
+
+colormap('gray')
 
 %% BUILT-IN double gaussian fit on dX
 boutsperseq = size(X,2)-sum(isnan(X),2);
@@ -56,7 +74,7 @@ mednbouts = median(boutsperseq);
 Vart1 = dLum(:, 1:end-1)./( (Luminosity(:, 1:end-2)+ Luminosity(:, 2:end-1))./2 ) ;
 Vart2 = dX(:, 2:end);
 dX(dX==0)=NaN;
-[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Vart1, Vart2, 5, 7);
+[binvals, elts_per_bin, v2bin_pos] = BinsWithEqualNbofElements(Vart1, Vart2, 3, 7);
 
 f1 = NaN(size(v2bin_pos,1), 3);
 f2  = NaN(size(v2bin_pos,1), 3);
@@ -71,7 +89,7 @@ for i = 1 : size(v2bin_pos,1)
     if c == 0
         c =1;
     end
-    [dx_histogram, x_histogram] = hist(v2bin_pos(i,:), 3*round(sqrt(elts_per_bin)));
+    [dx_histogram, x_histogram] = hist(v2bin_pos(i,:), 2*round(sqrt(elts_per_bin)));
     f = fit(x_histogram.',dx_histogram.','gauss2');
     forward = @(x) f.a1*exp(-((x-f.b1)/f.c1).^2);
     side = @(x) f.a2*exp(-((x-f.b2)/f.c2).^2);

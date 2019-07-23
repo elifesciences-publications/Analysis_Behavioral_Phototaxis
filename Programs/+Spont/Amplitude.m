@@ -1,13 +1,13 @@
 function[fig] = Amplitude(dXi)
 
 % Check amplitude correlation
-adXi = abs(dXi);
+adXi = (dXi).^2;
 adXn = adXi(:,1:end-1);
 adXnp1 = adXi(:,2:end);
 
 var1 = adXn;
-var2 = adXnp1;
-[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 12, 18);
+var2 = adXnp1/nanvar(adXn(:));
+[binvals, elts_per_bin, v2bin] = BinsWithEqualNbofElements(var1, var2, 18, 24);
 mv2 = mean(v2bin,2);
 stdv2 = std(v2bin,1,2);
 

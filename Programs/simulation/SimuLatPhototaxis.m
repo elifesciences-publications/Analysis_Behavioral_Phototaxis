@@ -1,60 +1,23 @@
+% Main Script for performing simulation of stereovisual phototaxis
 
-% load data
+%% Load data
 path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/PooledData/';
 name = 'lateralized_exps.mat';
 load([path name], 'El')
 XLat = El.AngleSource;
 
-%%
+%% Tunable parameters
 psw_turn = 0.2; % probabibility of switching left vs right states
-p_turn = 0.55; % probability of triggering a turn swim (otherwise go straight)
+p_turn = 0.41; % probability of triggering a turn swim (otherwise go straight)
 
-wturn= 0.74; % 1.1
-wstraight= 0.11; % 0.13
+wturn= 0.6; % 1.1
+wstraight= 0.1; % 0.13
 
 mturn = @(x) -pi/12*x; % pi/12
 %%
-% intitialization
-% -------------------------------------------------------------------------
-rng('shuffle')
-Nexp = 10000; % number of experiments
-Ntimes = 30; % number of time steps per experiment
-theta_complete = NaN(Nexp, Ntimes); % complete dataset
-lL_R = NaN(Nexp, Ntimes);
-
-initial_bias = 0;
-if logical(initial_bias)
-    theta_ini = randsample(XLat(:,1), Nexp, true); % bias the initial distribution
-else
-    theta_ini = rand(1,Nexp)*2*pi; % initial angles uniformly distributed
-end
-lum_lr_ini = interp1([-pi 0 pi], [1 -1 1], wrapToPi(theta_ini));
-%lrst = (rand > 0.5)*2-1; % intial turn state random 50/50
-lrst = 1;
-
-tic
-for N = 1:Nexp
-    theta = NaN(1,Ntimes);
-    lum_lr = NaN(1,Ntimes);
-    theta(1) = theta_ini(N);
-    lum_lr(1) = lum_lr_ini(N);
-    for t = 1:Ntimes-1
-        th = theta(t);
-        %lrst = lrst*((rand > psw_turn)*2-1); % independant from whole field illum
-        turn = rand <= p_turn;
-        if turn
-            dth = lrst * (wturn*randn) - mturn(lum_lr(t));
-        else
-            dth = lrst * (wstraight*randn);
-        end
-        
-        theta(t+1) = th + dth;
-        
-        lum_lr(t+1) = interp1([0 pi], [-1 1], abs(wrapToPi(theta(t+1))));
-    end
-    theta_complete(N,:) = theta;
-    lL_R(N,:) = lum_lr;
-end
+Nexp = 1000;
+Ntimes = 30;
+[theta_complete, lL_R] = random_walk_stereo_bias(Nexp, Ntimes, psw_turn, p_turn, wturn, wstraight, mturn);
 
 THETA = theta_complete(:);
 [mp, rho_p, mu_p] = circ_moment(THETA);
@@ -64,7 +27,7 @@ figure
 Nbins = 32;
 angle = ( (1:Nbins) -0.5) * 2*pi/Nbins;
 PDFangle = hist(mod(theta_complete(:),2*pi),Nbins)/sum(hist(mod(theta_complete(:),2*pi),Nbins));
-Xexp = XLat(:, 1:20);
+Xexp = XLat(:, 1:17);
 PDFangleLat =  hist(mod(Xexp(:),2*pi),Nbins)/sum(hist(mod(Xexp(:),2*pi),Nbins));
 
 % ***

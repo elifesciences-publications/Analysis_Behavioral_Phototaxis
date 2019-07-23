@@ -29,12 +29,11 @@ end
 xmean_fish = nanmean(xpdf_fish,1);
 xstd_fish = nanstd(xpdf_fish,1,1);
 
-
 %***
 fig = figure;
 
 % --- fake plot to have the same scale ---
-fake = polar(0, 0.15);
+fake = polar(0, 0.1);
 fake.HandleVisibility = 'off';
 hold on
 

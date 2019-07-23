@@ -1,29 +1,42 @@
 %% Simulation sterovisual phototaxis
 
+% --- Fetch data ---
+if ~exist('XLat','var')
+    path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/PooledData/';
+    name = 'lateralized_exps.mat';
+    load([path name], 'El')
+    XLat = El.AngleSource;
+    Xfilt = El.AngleSourceFiltered;
+    FishID = El.FishN;
+    medboutsperseq = median(size(XLat,2) - sum(isnan(XLat),2));
+    a_ini = El.xCoord(:,1)/11.5;
+    b_ini = El.yCoord(:,1)/11.5;
+    a_ini(isnan(a_ini))=[];
+    b_ini(isnan(a_ini))=[];
+    clear El
+end
+
 % === PARAMETERS TO TUNE ===
-Nexp=100000; % number of independent experiments
+Nexp=10000; % number of independent experiments
 Nsteps=50;  % number of time steps
 
 w1=wturn;   % std of turning bouts amplitude distribution 
 w2=wfor;    % std of forward bouts amplitude distribution 
 p=pturn;    % probability of turning bout
-pflip=0.188;  % neutral probability of flipping orientation
+pflip=0.19;  % neutral probability of flipping orientation
 %boutn = 1:Nsteps;
 %bias_slope = 20*(0.22-0.1*(log(-boutn/4))); % ratio of bias to contrast
 %bias_slope(bias_slope<0) = 0;
-bias_slope = 2;
-
-% --- generate two populations of inter-bout distances ---
-sigmafwd = 0.6;
-sigmaturn = 0.5;
-muturn=1;
-mufwd = 0.7;
-possible_lambda_values = 0:0.01:40;
+bias_slope = 8.5;% 9 if decremental, 2.3 if constant
 
 % --- initiate values ---
 lrst=(rand(Nexp,1)>0.5)*2-1;    % initial left/right state
 dx=[];                          % change in orientation
 x=-(rand(Nexp, 1)-0.5)*2*pi;    % uniform initial orientation
+
+ind = randsample(length(XLat(:,1)), Nexp, true);
+x = XLat(ind,1)+pi/2;             % sample from data
+
 qq=[];                          % flipping probability
 lr=[];                          % left right state
 lambda=[];
@@ -31,7 +44,8 @@ TS = zeros(Nexp, Nsteps);
 
 for t=1:Nsteps
     xlast=wrapToPi(x(:,end));
-    q=pflip*(1-0.5*bias_slope*lrst.*stereo_bias_mat(xlast));
+    q = pflip*(1-0.5*bias_slope/(t^.8)*lrst.*stereo_bias_mat(xlast));
+    %q = pflip*(1-0.5*bias_slope*lrst.*stereo_bias_mat(xlast));
     q(q<0)=0;
     q(q>1)=1;
     lrst=lrst.*((rand(Nexp,1)>q)*2-1);
@@ -46,36 +60,40 @@ for t=1:Nsteps
     qq=[qq, q];
     lr=[lr, lrst];
     l=NaN(Nexp,1);
-    l(indturn) = pick_from_lognorm_distrib(possible_lambda_values, sigmaturn, muturn, length(indturn))';
-    l(indfor) = pick_from_lognorm_distrib(possible_lambda_values, sigmafwd, mufwd, length(indfor))';
+    l(indturn) = gamrnd(3.5, 1, length(indturn),1);
+    l(indfor) = gamrnd(2.8, 1, length(indfor),1);
     lambda = [lambda, l];
     TS(:,t) = turn;
 end
 
 % --- ROI ---
+virtual_roi_radius = 41 ;
+
 % calculate cartesian coordinates at each time point
 theta = x(:,1:end-1);
 a = NaN(Nexp, Nsteps);
 b = NaN(Nexp, Nsteps);
-for i = 1 : Nsteps
-    if i == 1
-        a(:,i) = 0;
-        b(:,i) = 0;
-    else
-        [da, db] = pol2cart(theta(:,i-1), lambda(:,i));
-        a(:,i) = a(:,i-1) + da;
-        b(:,i) = b(:,i-1) + db;
-    end
+%a(:,1) = 0;
+%b(:,1) = 0;
+rho_ini = 20+1.3*randn(Nexp, 1);
+theta_ini = deg2rad(randi(360, Nexp, 1));
+[a(:,1),b(:,1)]= pol2cart(theta_ini, rho_ini);
+ind = randsample(length(a_ini), Nexp, true);
+a(:,1) = a_ini(ind)-41;
+b(:,1) = b_ini(ind)-41;
+
+for i = 1 : Nsteps-1
+    [da, db] = pol2cart(theta(:,i), lambda(:,i));
+    a(:,i+1) = a(:,i) + da;
+    b(:,i+1) = b(:,i) + db;
 end
 
 % finalize
-virtual_roi_radius = 42 ;
 within_roi = (sqrt(a.^2 + b.^2) < virtual_roi_radius);
 theta(within_roi == 0) = NaN;
 meanThovertime = circ_mean(theta);
 Rcirc = circ_r(theta);
 Rproj = Rcirc.*cos(meanThovertime);
-plot(Rproj)
 
 % --- get corresponding contrast ---
 percPm =1;
@@ -85,26 +103,72 @@ R = interp1(deg2rad(lum_lin(:,1)),lum_lin(:,2),abs(pi-mod(x-pi/2,2*pi))); % expe
 Csimu = L-R;
 Csimu = Csimu/max(abs(Csimu(:)));
 
-% --- polar distribution of x ---
-if ~exist('XLat','var')
-    path = '/Users/karp/Documents/PhD/Projects/Behaviorfish/PhototaxisFreeSwim/Analysis/PooledData/';
-    name = 'lateralized_exps.mat';
-    load([path name], 'El')
-    XLat = El.AngleSource;
-    Xfilt = El.AngleSourceFiltered;
-    FishID = El.FishN;
-    medboutsperseq = median(size(XLat,2) - sum(isnan(XLat),2));
-    clear El
+% --- data R ---
+meanThovertime = circ_mean(XLat+pi/2);
+RcircData = circ_r(XLat+pi/2);
+RprojData = RcircData.*cos(meanThovertime);
+
+boutsperseq = size(XLat,2)-sum(isnan(XLat),2);
+mednbouts = median(boutsperseq);
+
+boutsperseqsimu = size(theta,2)-sum(isnan(theta),2);
+mednboutssimu = median(boutsperseq);
+
+%***
+figure
+plot(Rproj)
+hold on
+plot(RprojData, 'k', 'Linewidth', 1.5)
+xlim([0 50])
+
+figure
+% trajectory display
+seqmax = Nexp
+aa = a(1:seqmax,:);
+bb = b(1:seqmax,:);
+th = theta(1:seqmax,:);
+ll = lambda(1:seqmax,:);
+wr = within_roi(1:seqmax,:);
+aa(wr == 0) = NaN;
+bb(wr == 0) = NaN;
+for i = 1 : size(aa,1)
+    seqend = find(isnan(aa(i,:)),1);
+    if ~isempty(seqend)
+        aa(i, seqend:end) = nan;
+        bb(i, seqend:end) = nan;
+        th(i, seqend:end) = nan;
+    end
 end
 
+%plot(aa', bb', '.-')
+%hold on
+%plot(aa(:,1)', bb(:,1)', 'sq')
+
+ll(wr == 0) = NaN;
+%***
+figure
+polarplot(th', repmat([1:Nsteps], seqmax,1)')
+
+%***
+xCoord0 = (aa-aa(:,1));
+yCoord0 = (bb-bb(:,1));
+rho = sqrt( (xCoord0).^2 + (yCoord0).^2 );
+
+arot = xCoord0.*cos(pi/2) - yCoord0.*sin(pi/2);
+brot = xCoord0.*sin(pi/2) + yCoord0.*cos(pi/2);
+%plot(arot',brot','.-')
+%title('source to the top')
+
+%%
 colourID = 4;
+Nbins = 18;
 fig = polar_distribution_simu_exp(XLat(:,1:medboutsperseq)+pi/2, x, Nbins, FishID, colourID);
 title('without escaping ROI')
 
-fig2 = polar_distribution_simu_exp(XLat(:,1:medboutsperseq)+pi/2, theta(:,1:30), Nbins, FishID, colourID);
+fig2 = polar_distribution_simu_exp(XLat(:,1:medboutsperseq)+pi/2, theta(:,1:mednboutssimu), Nbins, FishID, colourID);
 title('with escaping ROI')
 
-Nbins = 32;
+Nbins = 18;
 angle = ((1:Nbins) - 0.5) * 2*pi/Nbins;
 xpdf_data = hist(mod(XLat(:),2*pi),Nbins)/sum(hist(mod(XLat(:),2*pi),Nbins));
 XLsub = XLat(:,1:medboutsperseq);
@@ -220,7 +284,7 @@ Lat.a.auto_co_reinforcement(sign(dxcropped), Csimu, 20, 15)
 meanlambda = mean(v2bin,2);
 varlambda = var(v2bin,1,2);
 figure
-plot(binvals,meanlambda);
+plot(binvals, meanlambda);
 hold on
 plot(binvals, varlambda);
 

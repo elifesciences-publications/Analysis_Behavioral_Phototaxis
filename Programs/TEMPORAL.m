@@ -33,3 +33,13 @@ Temp.Autocorrelation
 
 %% Distribution analysis : double gaussian fits
 Temp.dXDistribution    
+
+%% Trajectories
+xCoord0 = (xCoord-xCoord(:,1))/pxmm;
+yCoord0 = (yCoord-yCoord(:,1))/pxmm;
+rho = sqrt( (xCoord0).^2 + (yCoord0).^2 );
+
+x = xCoord0.*cos(-wrapToPi(XLat(:,1))+Xlab(:,1)) - yCoord0.*sin(-wrapToPi(XLat(:,1)) + Xlab(:,1));
+y = xCoord0.*sin(-wrapToPi(XLat(:,1))+Xlab(:,1)) + yCoord0.*cos(-wrapToPi(XLat(:,1)) + Xlab(:,1));
+plot(x',y','.-')
+title('source to the top')
