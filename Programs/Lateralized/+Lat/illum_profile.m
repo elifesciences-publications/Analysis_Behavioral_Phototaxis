@@ -8,9 +8,15 @@ function[] = illum_profile(Xfilt, L, R)
 %--- on data ---
 %***
 figure
+<<<<<<< HEAD
 polarplot(XLat(:), R(:), 'r.', 'DisplayName', 'right', 'Color', rcolour(2,:))
 hold on
 polarplot(XLat(:), L(:), 'b.', 'DisplayName', 'left', 'Color', lcolour(2,:))
+=======
+polarplot(Xfilt(:), R(:), 'r.', 'DisplayName', 'right', 'Color', rcolour(2,:))
+hold on
+polarplot(Xfilt(:), L(:), 'b.', 'DisplayName', 'left', 'Color', lcolour(2,:))
+>>>>>>> master
 %polarplot(Xfilt(:), -(L(:)-R(:)), 'k.', 'DisplayName', 'C')
 title('on data')
 legend
@@ -30,6 +36,7 @@ fake = polar(theta, max(illumL)*ones(1,length(illumL)));
 set(fake,'Visible','off', 'HandleVisibility', 'off'); 
 hold on
 
+<<<<<<< HEAD
 pr = polar(theta-pi/2, illumR);
 pr.DisplayName= 'right';
 pr.LineWidth= 1.5; 
@@ -78,6 +85,30 @@ ac.FaceAlpha =  0.5;
 a.EdgeColor = lcolour(2,:);
 a.EdgeAlpha = 1;
 a.FaceAlpha =  0.2;
+=======
+p = polar(theta-pi/2, illumR);
+p.DisplayName= 'right';
+p.LineWidth= 1.5; 
+p.Color = rcolour(3,:);
+hold on
+a = fill(get(p,'XData'), get(p,'YData'), rcolour(3,:));
+a.EdgeColor = rcolour(2,:);
+a.EdgeAlpha = 1;
+a.FaceAlpha =  0.5;
+a.HandleVisibility = 'off';
+
+hold on
+p=polar(theta-pi/2, illumL);
+p.DisplayName =  'left';
+p.LineWidth = 1.5;
+p.Color =  lcolour(3,:);
+hold on
+a = fill(get(p,'XData'), get(p,'YData'), lcolour(3,:));
+a.EdgeColor = lcolour(2,:);
+a.EdgeAlpha = 1;
+a.FaceAlpha =  0.5;
+a.HandleVisibility = 'off';
+>>>>>>> master
 
 theta_ticks_to_remove = {'30','60','120','150','210','240','300','330'};
 for th = 1:length(theta_ticks_to_remove)
@@ -90,9 +121,12 @@ for th = 1:length(theta_ticks)
         'String', theta_labels{th}, 'FontSize', 14, 'FontName', 'Times New Roman');
 end
 
+<<<<<<< HEAD
 ax = gcf;
 ax.FontName = 'Times New Roman';
 ax.FontSize = 18;
+=======
+>>>>>>> master
 
 view([-90 -90])
 

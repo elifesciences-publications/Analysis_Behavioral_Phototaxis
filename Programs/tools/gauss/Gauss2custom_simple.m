@@ -12,9 +12,15 @@ bins = min(data):binwidth:max(data);
 xhist=edges(1:end-1)+binwidth/2;
 yhist=yhist/(sum(yhist)*binwidth);
 
+<<<<<<< HEAD
 ft = fittype('double_gauss_constrained(x, a1, muabs, w)', 'problem', {'muabs','w'});
 f = fit(xhist', yhist', ft, 'StartPoint', [0.2], 'Lower', 0, 'Upper', 1, 'problem', {muabs,w}, 'Robust', 'LAR');
 a = f.a1;
+=======
+ft=fittype('double_gauss_constrained(x, a1, muabs, w)', 'problem', {'muabs','w'});
+f=fit(xhist', yhist', ft, 'StartPoint', [0.2], 'Lower', 0, 'Upper', 1, 'problem', {muabs,w});
+a=f.a1;
+>>>>>>> master
 aci = confint(f,0.99);
 
 wturn = (muabs*a+sqrt(muabs^2*a^2-(muabs^2-w*(1-a))*(a^2+a*(1-a))))/(a^2+a*(1-a));

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 function[] = visualizeTrajectoryAndAdv(fish, X, xCoord, yCoord, Dist, Adv, dX, trajOrientation)
 
 % pix to mm
@@ -27,6 +28,24 @@ for s = fish'
         
     unitvecty1 = 2.5*sin(fishorient-pi);
     unitvectx1 = 2.5*cos(fishorient);
+=======
+function[] = visualizeTrajectoryAndAdv(fish, Xlab, xCoord, yCoord, Dist, Adv, dX, trajOrientation, splot)
+
+dxCoord = diff(xCoord, 1, 2);
+dyCoord = diff(yCoord, 1, 2);
+
+for s = fish'
+    fishorient = (Xlab(s,:));
+    dx = dxCoord(s,:);
+    dy = dyCoord(s,:);
+    d = Dist(s,:);
+    adv = Adv(s,:);
+    dthe = dX(s,:);
+    n = find(adv<0 & abs(dthe)<pi/2);
+        
+    unitvecty1 = 20*sin(fishorient-pi);
+    unitvectx1 = 20*cos(fishorient);
+>>>>>>> master
     %
     % trajorient = atan(dy./dx);
     % trajorient(dx < 0) = trajorient(dx < 0) - pi;
@@ -35,11 +54,24 @@ for s = fish'
     unitvecty = d.*sin(trajorient);
     unitvectx = d.*cos(trajorient);
     
+<<<<<<< HEAD
     plot(xCoord(s,:), yCoord(s,:), '-o',...
         'Color', traject_color, 'Markersize', 2, 'MarkerFaceColor', 'k')
     hold on
     plot(xCoord(s,1), yCoord(s,1), 'sq',...
         'Markersize', 7, 'MarkerFaceColor', start_color, 'MarkerEdgeColor', start_color)
+=======
+    %***
+%     if splot
+%         subplot(3,2,[2 4])
+%     else
+%         figure;    
+%         subplot(3,1,1:2)
+%     end
+    plot(xCoord(s,:), yCoord(s,:), '--*', 'Color', [0.8 0.8 0.8])
+    hold on
+    plot(xCoord(s,1), yCoord(s,1), 'sq')
+>>>>>>> master
     plot(xCoord(s,n), yCoord(s,n), 'o')
     hold on
     set(gca,'DataAspectRatio',[1,1,1])
@@ -49,6 +81,7 @@ for s = fish'
         uvx1 = linspace(xCoord(s,i),xCoord(s,i)+unitvectx1(i), 10);
         uvy1 = linspace(yCoord(s,i),yCoord(s,i)+unitvecty1(i), 10);
         plot(uvx, uvy,'k', uvx1, uvy1, 'r')
+<<<<<<< HEAD
         arrow_color = [norm_turn_magn(i) 0 1-norm_turn_magn(i)];
         if isnan(arrow_color)
             return
@@ -78,4 +111,18 @@ for s = fish'
     disp(s)
     waitforbuttonpress
     hold off
+=======
+    end
+    xlim([0 1000])
+    ylim([0 1000])
+%     if splot
+%         subplot(3,2,6)
+%     else
+%         subplot(3,1,3)
+%     end
+    %plot(Adv(s,:))
+    %title(['seq ' num2str(s) ', ' num2str(cumulativeAdvancement(s))])
+    
+    waitforbuttonpress
+>>>>>>> master
 end

@@ -72,4 +72,8 @@ ax.FontSize = 14;
 %%
 dII = dLum(:, 1:end-1)./( (Lum(:, 1:end-2)+ Lum(:, 2:end-1))./2 ) ;
 bins = 12;
+<<<<<<< HEAD
 Temp.auto_co_reinforcement(dX, dII, bins);
+=======
+Temp.a.auto_co_reinforcement(dX, dII, bins);
+>>>>>>> master
