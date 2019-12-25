@@ -1,8 +1,8 @@
 % simulation unbiased navigation
 
 %%
-psw_turn = 0.1; % probabibility of switching left vs right states
-p_turn = 0.5; % probability of triggering a turn swim (otherwise go straight)
+psw_turn = 0.19; % probabibility of switching left vs right states
+p_turn = 0.41; % probability of triggering a turn swim (otherwise go straight)
 
 wturn=0.74; % 0.74
 wstraight=0.12; % 0.12
@@ -16,13 +16,8 @@ Ntimes = 100; % number of time steps per experiment
 theta_complete = NaN(Nexp, Ntimes); % complete dataset
 luminosity_complete = NaN(Nexp, Ntimes);
 
-initial_bias = 1;
 start = 5;
-if initial_bias ==1
-    theta_ini = randsample(e6_x(:,start), Nexp, true); % bias the initial distribution
-else
-    theta_ini = rand(1,Nexp)*2*pi; % initial angles uniformly distributed
-end
+theta_ini = rand(1,Nexp)*2*pi; % initial angles uniformly distributed
 lrst = (rand > 0.5)*2-1; % intial turn state random 50/50
 
 tic
@@ -51,21 +46,14 @@ figure
 Nbins = 64;
 angle = ( (1:Nbins) -0.5) * 2*pi/Nbins;
 PDFangle = hist(mod(theta_complete(:),2*pi),Nbins)/sum(hist(mod(theta_complete(:),2*pi),Nbins));
-PDFangleExp =  hist(mod(e6_x(:),2*pi),Nbins)/sum(hist(mod(e6_x(:),2*pi),Nbins));
 
 %fig = figure;
 subplot(2,1,1)
 plot(angle,PDFangle);
-hold on
-plot(angle,PDFangleExp);
-legend('simu', 'exp60')
+legend('simu')
 
 subplot(2,1,2)
 polarplot([angle,angle(1)],[PDFangle,PDFangle(1)]);
-set(gca,'ThetaZeroLocation','left',...
-        'ThetaDir','clockwise')
-hold on
-polarplot([angle,angle(1)],[PDFangleExp,PDFangleExp(1)]);
 set(gca,'ThetaZeroLocation','left',...
         'ThetaDir','clockwise')
 
@@ -94,16 +82,3 @@ figure
 plot(Rsimu)
 hold on
 plot(Rpsimu)
-
-%% comparison with experiment
-% load experiment
-loadPooledExperimentsCell
-
-% time dyn script
-TemporalDynamics
-
-subplot(3,1,1)
-plot(start : (Ntimes + start -1) , Rsimu, 'Linewidth', 1.5)
-
-subplot(3,1,2)
-plot(start : (Ntimes + start -1) , Rpsimu, 'Linewidth', 1.5)
