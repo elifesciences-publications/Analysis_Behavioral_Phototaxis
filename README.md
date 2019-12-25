@@ -1,8 +1,8 @@
 Analysis
 
-%%%%%%%%%%%%
+------
 Contains Data and Matlab codes for analysis of orientational light-seeking behavior experiments analysis
-%%%%%%%%%%%%
+------
 
 ---
 Folder 'Data_pooled' contains data files .mat of different experimental modalities:
