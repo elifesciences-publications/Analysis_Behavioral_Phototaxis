@@ -7,7 +7,7 @@ load([path name], 'El')
 XLat = El.AngleSource;
 
 %% Tunable parameters
-psw_turn = 0.2; % probabibility of switching left vs right states
+psw_turn = 0.19; % probabibility of switching left vs right states
 p_turn = 0.41; % probability of triggering a turn swim (otherwise go straight)
 
 wturn= 0.6; % 1.1
